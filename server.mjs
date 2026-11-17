@@ -1,9 +1,10 @@
+import {VERSION} from './agent.js';
 import {runExtraction} from './harness.mjs';
 const languages=new Set(['hi-IN','ta-IN','te-IN','kn-IN','ml-IN','mr-IN','bn-IN','gu-IN','pa-IN','od-IN','en-IN']);
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 export async function handleApi(request,env){
  const path=new URL(request.url).pathname;
- if(path==='/api/status'&&request.method==='GET')return json({ready:Boolean(env.SARVAM_API_KEY && env.LIVE_ACCESS_TOKEN?.length>=32),provider:'Sarvam',mode:'synthetic-demo',version:'intake-v1'});
+ if(path==='/api/status'&&request.method==='GET')return json({ready:Boolean(env.SARVAM_API_KEY && env.LIVE_ACCESS_TOKEN?.length>=32),provider:'Sarvam',mode:'synthetic-demo',version:VERSION});
  if(!['/api/transcribe','/api/translate','/api/speak','/api/extract'].includes(path))return json({error:'Not found'},404);
  if(request.method!=='POST')return json({error:'Method not allowed'},405);
  if(request.headers.get('origin')!==new URL(request.url).origin||request.headers.get('X-Patient-Consent')!=='yes')return json({error:'Same-origin request and patient consent are required.'},403);

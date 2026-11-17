@@ -1,4 +1,4 @@
-import {Workflow,FIELDS,LABELS,validateExtraction,clarify,handoff} from './agent.js';
+import {VERSION,Workflow,FIELDS,LABELS,validateExtraction,clarify,handoff} from './agent.js';
 import {CASES} from './sample-cases.js';
 const $=id=>document.getElementById(id);
 const flow=new Workflow();let ready=false,mode='manual',loaded=null,result=null,clarifications='',corrections={},busy=false,controller=null,recording=null,stream=null,timer=null,audioUrl=null,requestSerial=0;
@@ -25,7 +25,7 @@ function renderFacts(){
  if(result.ambiguities.length){const warn=document.createElement('p');warn.className='review-note';warn.textContent='Unresolved / ambiguous: '+result.ambiguities.map(a=>`“${a.quote}”`).join(' · ');$('facts').append(warn);}
  return pending;
 }
-function extractionReady(data){result=data.result;const errors=validateExtraction(result,{english:$('english').value,clarifications});if(errors.length)throw Error('Invalid evidence. Review text and retry.');move('extracted');const pending=renderFacts();$('agent-meta').textContent=data.meta?`${data.meta.mode} · ${data.meta.calls} calls · ${data.meta.latencyMs} ms · prompt intake-v1`:'Prewritten sample extraction · no model calls';$('questions').replaceChildren();
+function extractionReady(data){result=data.result;const errors=validateExtraction(result,{english:$('english').value,clarifications});if(errors.length)throw Error('Invalid evidence. Review text and retry.');move('extracted');const pending=renderFacts();$('agent-meta').textContent=data.meta?`${data.meta.mode} · ${data.meta.calls} calls · ${data.meta.latencyMs} ms · prompt ${VERSION}`:'Prewritten sample extraction · no model calls';$('questions').replaceChildren();
  for(const question of pending.questions){const label=document.createElement('label');label.textContent=question.text;const input=document.createElement('textarea');input.rows=2;input.maxLength=300;input.dataset.field=question.field;input.placeholder='Optional · leave blank if unknown';label.append(input);$('questions').append(label);}
  if(pending.questions.length){move('clarifying');$('clarification-panel').hidden=false;}else move('awaiting_review');status('Facts ready. Verify the full quotes and their categories.');}
 $('sample').onclick=loadSample;$('case').onchange=()=>{resetDerived();$('transcript').value='';$('english').value='';loaded=null;mode='manual';status('Choose Try a sample case to load the selected fictional case.');};

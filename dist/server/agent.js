@@ -1,4 +1,4 @@
-export const VERSION='intake-v1';
+export const VERSION='intake-v1.1';
 export const FIELDS=['concern','symptoms','duration','severity','medicines','allergies','history','questions'];
 export const LABELS={concern:'Main concern',symptoms:'Reported symptoms',duration:'Onset / duration',severity:'Severity in patient’s words',medicines:'Current medicines',allergies:'Allergies',history:'Reported history',questions:'Patient questions'};
 export const FACT_SCHEMA={type:'object',additionalProperties:false,required:['facts','ambiguities'],properties:{facts:{type:'array',maxItems:24,items:{type:'object',additionalProperties:false,required:['field','quote','sourceId'],properties:{field:{type:'string',enum:FIELDS},quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}},ambiguities:{type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['quote','sourceId'],properties:{quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}}}};

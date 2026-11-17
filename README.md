@@ -25,7 +25,7 @@ Open http://127.0.0.1:4317. Select a language and fictional case, load it, extra
 
 Live mode requires `SARVAM_API_KEY` and `LIVE_ACCESS_TOKEN` (at least 32 characters). Enter the owner's access token under **Live processing access**; it is held in the page only and cleared with the session. The Sarvam subscription key never enters browser code. Obtain credentials separately; none are included. Local `.env` files are not automatically loaded.
 
-Optional `SARVAM_TEXT_MODEL` is `sarvam-105b` (default) or `sarvam-105b-conversations`. Speech uses `saaras:v3`, translation `sarvam-translate:v1`, readback `bulbul:v3`. Extraction uses Sarvam's `/v1/chat/completions`, JSON output, `reasoning_effort:none`, and a 2200-output-token limit per call. No additional AI provider is enabled.
+Optional `SARVAM_TEXT_MODEL` is `sarvam-105b` (default) or `sarvam-105b-conversations`. Speech uses `saaras:v3`, translation `sarvam-translate:v1`, readback `bulbul:v3`. Extraction uses Sarvam's `/v1/chat/completions`, strict JSON-schema output, `reasoning_effort:low`, and a 2200-output-token limit per call. No additional AI provider is enabled.
 
 Consent is required before any live request. Processing fails closed without both the provider key and access gate. Public demo visitors cannot invoke paid APIs unauthenticated. The shared access token is a prototype gate, not patient identity or clinical access management.
 
@@ -68,7 +68,7 @@ npm run build
 gcloud run deploy swasthya-saathi --source . --project=swasthya-saathi-2026 --region=asia-south1 --min-instances=0 --max-instances=1 --concurrency=10 --memory=512Mi --cpu=1 --timeout=90 --quiet
 ```
 
-The Docker image contains built server/static assets only. `.gcloudignore` and `.dockerignore` exclude credentials and Git metadata. Put production secrets in Secret Manager and grant the Cloud Run runtime service account access only to those secrets. Attach them via Cloud Run `--update-secrets` with explicit version numbers. Configure both required secrets together. Do not pass values through shell arguments or source files. No key was configured during implementation, so live calls and live evaluations remain unverified.
+The Docker image contains built server/static assets only. `.gcloudignore` and `.dockerignore` exclude credentials and Git metadata. Put production secrets in Secret Manager and grant the Cloud Run runtime service account access only to those secrets. Attach them via Cloud Run `--update-secrets` with explicit version numbers. Configure both required secrets together. Do not pass values through shell arguments or source files. Production credentials are stored in Secret Manager and attached by explicit version. A small synthetic live smoke test is run separately from the 30-case evaluation; live evaluation accuracy is not established by a smoke test.
 
 List revisions with `gcloud run revisions list --service=swasthya-saathi --region=asia-south1 --project=swasthya-saathi-2026`. Roll back using `gcloud run services update-traffic swasthya-saathi --to-revisions=PREVIOUS_REVISION=100 --region=asia-south1 --project=swasthya-saathi-2026`.
 
@@ -77,3 +77,7 @@ GitHub Actions runs tests, offline fixture checks, and a build. It does not depl
 ## Boundaries
 
 Synthetic prototype for communication support. No diagnosis, prescribing, urgency scoring, EHR integration, persistent patient memory, clinical validation, or regulatory compliance claim. The screenshot supplied at project start contained a buildathon signup reminder, not judging criteria or a healthcare specification.
+
+## Live smoke test (17 November 2026)
+
+The personal Sarvam account had 2600 available credits before testing. A dedicated app key was created with owner approval and stored in Secret Manager; it was never committed. Live Hindi-to-English translation, generated Hindi speech, and transcription of that generated speech succeeded. The chat endpoint rejected the documentation's `none` reasoning setting; the harness uses `low` and strict `json_schema` output. The corrected extraction returned three valid facts in one call (583 input / 74 output tokens in the direct synthetic test). This is a functional smoke test, not clinical accuracy or a full evaluation. The production access gate remains required. The existing unrelated key was left intact.
