@@ -1,3 +1,4 @@
+import {evidenceUnits,wholeEvidence} from './sentence.js';
 export const VERSION='intake-v2.2';
 export const FIELDS=['concern','symptoms','duration','severity','medicines','allergies','history','questions'];
 export const LABELS={concern:'Main concern',symptoms:'Reported symptoms',duration:'Onset / duration',severity:'Severity in patient’s words',medicines:'Current medicines',allergies:'Allergies',history:'Reported history',questions:'Patient questions'};
@@ -10,7 +11,7 @@ export function anchorEvidence(result,sources){
  let expansions=0;
  const anchor=f=>{
   if(!f||typeof f.quote!=='string'||typeof sources[f.sourceId]!=='string')return f;
-  const sentences=sources[f.sourceId].match(/[^.!?।。\n]+[.!?।。]?/g)?.map(s=>s.trim()).filter(Boolean)||[];
+  const sentences=evidenceUnits(sources[f.sourceId],f.sourceId);
   if(sentences.includes(f.quote))return f;
   const needle=tokens(f.quote);if(!needle)return f;
   const matches=sentences.filter(s=>s.length<=500&&(' '+tokens(s)+' ').includes(' '+needle+' '));
@@ -29,11 +30,7 @@ export function validateExtraction(result,sources){
   if(!fact||typeof fact!=='object'||Object.keys(fact).some(k=>!keys.includes(k))||keys.some(k=>typeof fact[k]!=='string')){errors.push('Invalid fact schema');continue;}
   if(keys.includes('field')&&!FIELDS.includes(fact.field))errors.push('Field not allowed');
   if(!['english','clarifications'].includes(fact.sourceId)||!fact.quote.trim()||fact.quote.length>500||!sources[fact.sourceId]?.includes(fact.quote))errors.push('Evidence does not match source');
-  if(typeof fact.quote==='string'&&typeof sources[fact.sourceId]==='string'){
-   const text=sources[fact.sourceId];let start=text.indexOf(fact.quote),whole=false;
-   while(start>=0){const before=text.slice(0,start).trimEnd(),after=text.slice(start+fact.quote.length).trimStart();if((!before||/[.!?。।:\n]$/.test(text.slice(0,start).trimEnd())||text[start-1]==='\n')&&(!after||/[.!?。।]$/.test(fact.quote)||/^[.!?。।\n]/.test(after)||text[start+fact.quote.length]==='\n'))whole=true;start=text.indexOf(fact.quote,start+1);}
-   if(!whole)errors.push('Quote must preserve the full sentence or clarification answer');
-  }
+  if(!wholeEvidence(fact.quote,sources[fact.sourceId],fact.sourceId))errors.push('Quote must preserve the full sentence or clarification answer');
   // Evidence is displayed verbatim: the model cannot introduce a separate unsupported value.
  }
  const unique=new Set(result.facts.map(f=>JSON.stringify(f)));if(unique.size!==result.facts.length)errors.push('Duplicate fact');

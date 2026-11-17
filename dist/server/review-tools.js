@@ -1,10 +1,11 @@
+import {segmentSentences} from './sentence.js';
 import {FIELDS,clarify} from './agent.js';
 export const REVIEW_RULES_VERSION='review-rules-v1';
 export const instructionLike=quote=>/^(ignore (all |the )?(previous|prior)|system instruction\s*:|reveal (the |your )?(prompt|system)|you are (now |an? )|override (the |your ))/i.test(quote.trim());
 export function reviewSignals(sources,result){
  const signals=[];
  for(const [sourceId,text] of Object.entries(sources)){
-  if(!text)continue;const sentences=text.match(/[^.!?।。]+[.!?।。]?/g)?.map(s=>s.trim()).filter(Boolean)||[];
+  if(!text)continue;const sentences=segmentSentences(text);
   sentences.forEach((quote,i)=>{
    if(instructionLike(quote))signals.push({kind:'instruction',quote,sourceId,text:'Instruction-like source text excluded from clinical fact cards.'});
    if(/^(actually[, ]|correction\s*:|i meant\b)/i.test(quote)){if(i)signals.push({kind:'correction',quote:sentences[i-1],sourceId,text:'Earlier statement: compare with the explicit correction.'});signals.push({kind:'correction',quote,sourceId,text:'Explicit correction: reviewer must reconcile these statements.'});}
