@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {handleApi} from '../server.mjs';
 const origin='https://example.test';
 const req=(path,body,extra={})=>new Request(origin+'/api/'+path,{method:'POST',headers:{origin,'X-Patient-Consent':'yes','Content-Type':'application/json',Authorization:'Bearer '+ 'a'.repeat(32),...extra},body:JSON.stringify(body)});
-test('status never exposes the secret',async()=>{const r=await handleApi(new Request(origin+'/api/status'),{SARVAM_API_KEY:'test-secret',LIVE_ACCESS_TOKEN:'a'.repeat(32)});assert.deepEqual(await r.json(),{ready:true,provider:'Sarvam',mode:'synthetic-demo',version:'intake-v2.2'});});
+test('status never exposes the secret',async()=>{const r=await handleApi(new Request(origin+'/api/status'),{SARVAM_API_KEY:'test-secret',LIVE_ACCESS_TOKEN:'a'.repeat(32)});assert.deepEqual(await r.json(),{ready:true,provider:'Sarvam',mode:'synthetic-demo',version:'intake-v3'});});
 test('live calls require configured key and explicit consent',async()=>{assert.equal((await handleApi(req('translate',{text:'hello',language:'en-IN'}),{})).status,503);assert.equal((await handleApi(req('translate',{}, {'X-Patient-Consent':'no'}),{SARVAM_API_KEY:'test',LIVE_ACCESS_TOKEN:'a'.repeat(32)})).status,403);});
 test('rejects cross-origin requests',async()=>{assert.equal((await handleApi(req('speak',{}, {origin:'https://other.test'}),{SARVAM_API_KEY:'test',LIVE_ACCESS_TOKEN:'a'.repeat(32)})).status,403);});
 test('rejects unsupported language and oversized text',async()=>{for(const body of [{text:'hi',language:'bad'},{text:'a'.repeat(2001),language:'hi-IN'}])assert.equal((await handleApi(req('translate',body),{SARVAM_API_KEY:'test',LIVE_ACCESS_TOKEN:'a'.repeat(32)})).status,400);});

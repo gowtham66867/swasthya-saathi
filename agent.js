@@ -1,8 +1,9 @@
+import {VALUE_SCHEMA,valueIssues,factKey} from './values.js';
 import {evidenceUnits,wholeEvidence} from './sentence.js';
-export const VERSION='intake-v2.2';
+export const VERSION='intake-v3';
 export const FIELDS=['concern','symptoms','duration','severity','medicines','allergies','history','questions'];
 export const LABELS={concern:'Main concern',symptoms:'Reported symptoms',duration:'Onset / duration',severity:'Severity in patient’s words',medicines:'Current medicines',allergies:'Allergies',history:'Reported history',questions:'Patient questions'};
-export const FACT_SCHEMA={type:'object',additionalProperties:false,required:['facts','ambiguities'],properties:{facts:{type:'array',maxItems:24,items:{type:'object',additionalProperties:false,required:['field','quote','sourceId'],properties:{field:{type:'string',enum:FIELDS},quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}},ambiguities:{type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['quote','sourceId'],properties:{quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}}}};
+export const FACT_SCHEMA={type:'object',additionalProperties:false,required:['facts','ambiguities'],properties:{facts:{type:'array',maxItems:24,items:{type:'object',additionalProperties:false,required:['field','quote','sourceId'],properties:{field:{type:'string',enum:FIELDS},quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']},value:VALUE_SCHEMA}}},ambiguities:{type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['quote','sourceId'],properties:{quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}}}};
 // Expand only contiguous source tokens to their unique, complete source sentence.
 // This changes quotation boundaries, never the patient's words or the field label.
 export function anchorEvidence(result,sources){
@@ -26,9 +27,10 @@ export function validateExtraction(result,sources){
  if(!result||typeof result!=='object'||Array.isArray(result)||Object.keys(result).some(k=>!['facts','ambiguities'].includes(k))||!Array.isArray(result.facts)||!Array.isArray(result.ambiguities))return ['Invalid extraction schema'];
  if(result.facts.length>24||result.ambiguities.length>6)errors.push('Too many results');
  for(const fact of [...result.facts,...result.ambiguities]){
-  const keys=result.facts.includes(fact)?['field','quote','sourceId']:['quote','sourceId'];
-  if(!fact||typeof fact!=='object'||Object.keys(fact).some(k=>!keys.includes(k))||keys.some(k=>typeof fact[k]!=='string')){errors.push('Invalid fact schema');continue;}
+  const keys=result.facts.includes(fact)?['field','quote','sourceId','value']:['quote','sourceId'];
+  if(!fact||typeof fact!=='object'||Object.keys(fact).some(k=>!keys.includes(k))||keys.filter(k=>k!=='value').some(k=>typeof fact[k]!=='string')){errors.push('Invalid fact schema');continue;}
   if(keys.includes('field')&&!FIELDS.includes(fact.field))errors.push('Field not allowed');
+  if(keys.includes('field'))errors.push(...valueIssues(fact));
   if(!['english','clarifications'].includes(fact.sourceId)||!fact.quote.trim()||fact.quote.length>500||!sources[fact.sourceId]?.includes(fact.quote))errors.push('Evidence does not match source');
   if(!wholeEvidence(fact.quote,sources[fact.sourceId],fact.sourceId))errors.push('Quote must preserve the full sentence or clarification answer');
   // Evidence is displayed verbatim: the model cannot introduce a separate unsupported value.
@@ -50,10 +52,10 @@ export class Workflow{
  reset(){this.state='created';this.revision++;this.history=['created'];}
  accept(revision){return revision===this.revision&&this.state!=='cancelled';}
 }
-export function handoff({reference,language,original,english,clarifications='',result,corrections={},reviewed,state,mode}){
+export function handoff({reference,language,original,english,clarifications='',result,corrections={},valueCorrections={},reviewed,state,mode}){
  if(!reviewed||!['approved','exported'].includes(state))throw Error('Patient review is required before export.');
  if(validateExtraction(result,{english,clarifications}).length)throw Error('Invalid evidence. Extract again before export.');
- const rows=FIELDS.map(field=>{const facts=result.facts.filter(f=>f.field===field);const correction=corrections[field]?.trim();return `${LABELS[field]}: ${correction?correction+' [operator correction — confirm with patient]':facts.length?facts.map(f=>f.quote).join(' | '):'Unknown — not reported'}\n${facts.map(f=>`  Evidence (${f.sourceId}): “${f.quote}”`).join('\n')}`;});
+ const rows=FIELDS.map(field=>{const facts=result.facts.filter(f=>f.field===field);const correction=corrections[field]?.trim();return `${LABELS[field]}: ${correction?correction+' [operator correction — confirm with patient]':facts.length?facts.map(f=>f.quote).join(' | '):'Unknown — not reported'}\n${facts.map(f=>`  Evidence (${f.sourceId}): “${f.quote}”${f.value?'\n  Proposed — verify against quote: '+JSON.stringify(f.value):''}${valueCorrections[factKey(f)]?'\n  Operator value correction — confirm with patient: '+valueCorrections[factKey(f)]:''}`).join('\n')}`;});
  return ['SWASTHYA SAATHI · PATIENT-REPORTED HANDOFF','For clinician review · no diagnosis or urgency assessment',`Reference: ${reference||'Not provided'}`,`Language: ${language}`,`Mode: ${mode}`,`Prompt/schema: ${VERSION}`,`Created: ${new Date().toISOString()}`,'','ORIGINAL PATIENT WORDS',original,'','ENGLISH VERSION — operator reviewed',english,'','CLARIFICATIONS — operator recorded',clarifications||'Not provided','',...rows,'','UNRESOLVED / AMBIGUOUS',...result.ambiguities.map(a=>`“${a.quote}” (${a.sourceId})`),'','Missing fields may remain unknown. Confirm details directly with the patient. Translation and classification can contain errors.'].join('\n');
 }
 
