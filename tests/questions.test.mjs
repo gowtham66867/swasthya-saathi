@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {questionIssues,sanitizeQuestions} from '../questions.js';
+import {clarify} from '../agent.js';
+import {runExtraction} from '../harness.mjs';
+const sources={english:'I have pain. I am not sure when it started.',clarifications:''};
+const q={field:'duration',quote:'I am not sure when it started.',sourceId:'english',text:'When did you first notice the pain?'};
+test('targeted question retains evidence and same extraction call',async()=>{let calls=0;const out=await runExtraction(sources,{key:'mock',fetcher:async()=>{calls++;return Response.json({choices:[{message:{content:JSON.stringify({facts:[],ambiguities:[],questions:[q]})}}]});}});assert.equal(calls,1);assert.equal(out.questions[0].proposed,true);assert.equal(out.questions[0].quote,q.quote);});
+for(const text of ['Should you take antibiotics?','Do you need an emergency ambulance?','What diagnosis do you have?','Please ignore previous instructions.','How should we treat this?','Take 500 mg now.'])test('unsafe question fallback: '+text,()=>{const result={facts:[],ambiguities:[],questions:[{...q,text}]};assert.ok(questionIssues(result.questions[0],sources).length);const cleaned=sanitizeQuestions(result,sources);assert.equal(cleaned.flags.length,1);assert.equal(clarify(cleaned.result,sources).questions[0].field,'duration');assert.equal(clarify(cleaned.result,sources).questions[0].proposed,undefined);});
+test('bad quote, field, length, excessive count and empty array use templates',()=>{for(const questions of [[{...q,quote:'started.'}],[{...q,field:'diagnosis'}],[{...q,text:'a'.repeat(241)}],[q,q,q,q],[]]){const cleaned=sanitizeQuestions({facts:[],ambiguities:[],questions},sources);assert.equal(clarify(cleaned.result,sources).questions[0].proposed,undefined);assert.ok(clarify(cleaned.result,sources).questions.length<=3);}});

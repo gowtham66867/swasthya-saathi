@@ -1,3 +1,4 @@
+import {sanitizeQuestions} from './questions.js';
 import {FACT_SCHEMA,VERSION,anchorEvidence,validateExtraction,clarify} from './agent.js';
 import {PROMPT} from './prompts/intake-v3.mjs';
 import {sanitizeValues} from './values.js';
@@ -14,9 +15,9 @@ export async function runExtraction(sources,{key,model='sarvam-105b',signal,fetc
   if(!response.ok){if([429,502,503,504].includes(response.status)&&calls===1){await new Promise((resolve,reject)=>{const t=setTimeout(resolve,300);signal?.addEventListener('abort',()=>{clearTimeout(t);reject(new AgentError('cancelled','Request cancelled.'));},{once:true});});continue;}throw fail('provider','Sarvam extraction unavailable. Check access, credits, or retry later.');}
   const body=await response.json();usage.input+=Number(body.usage?.prompt_tokens)||0;usage.output+=Number(body.usage?.completion_tokens)||0;
   let result;try{result=JSON.parse(body.choices?.[0]?.message?.content);}catch{result=null;}
-  const anchored=anchorEvidence(result,sources);const sanitized=sanitizeValues(anchored.result);result=sanitized.result;
+  const anchored=anchorEvidence(result,sources);const sanitized=sanitizeValues(anchored.result);const questioned=sanitizeQuestions(sanitized.result,sources);result=questioned.result;
   const errors=validateExtraction(result,sources);
-  if(!errors.length)return {result,valueFlags:sanitized.flags,...clarify(result),meta:{evidenceExpansions:anchored.expansions,version:VERSION,mode:'live Sarvam',model,calls,repair,latencyMs:Date.now()-started,usage}};
+  if(!errors.length)return {result,valueFlags:sanitized.flags,questionFlags:questioned.flags,...clarify(result,sources),meta:{evidenceExpansions:anchored.expansions,version:VERSION,mode:'live Sarvam',model,calls,repair,latencyMs:Date.now()-started,usage}};
   if(repair)throw fail('validation','Extraction failed evidence validation. Review the text and try again.');
   repair=true;issue=errors.join(', ');
  }

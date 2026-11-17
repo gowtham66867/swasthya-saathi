@@ -19,7 +19,7 @@ export function reviewSignals(sources,result){
 }
 export function applyReviewRules(result,sources){
  const filtered={...result,facts:result.facts.filter(f=>!excludeInstruction(f.quote))};
- const signals=reviewSignals(sources,result);return {result:filtered,signals,...clarify(filtered),rulesVersion:REVIEW_RULES_VERSION};
+ const signals=reviewSignals(sources,result);return {result:filtered,signals,...clarify(filtered,sources),rulesVersion:REVIEW_RULES_VERSION};
 }
 export function reviewOverview(result,corrections={}){return {known:FIELDS.filter(f=>result.facts.some(x=>x.field===f)||corrections[f]?.trim()),unknown:FIELDS.filter(f=>!result.facts.some(x=>x.field===f)&&!corrections[f]?.trim()),corrections:Object.values(corrections).filter(x=>x?.trim()).length};}
 export function timingObservation({manualMs=null,assistedMs=null,manualCaseId=null,caseId,corrections=0}){const valid=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0;const comparable=manualCaseId===caseId&&valid(manualMs)&&valid(assistedMs);return {kind:'operator self-timed synthetic observation - not a study',caseId,manualCaseId,manualMs:valid(manualMs)?manualMs:null,assistedMs:valid(assistedMs)?assistedMs:null,corrections,comparable,savedMs:comparable?manualMs-assistedMs:null,clinicianValidated:false};}

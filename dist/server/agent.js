@@ -1,10 +1,11 @@
+import {QUESTION_SCHEMA,questionIssues,proposedQuestions} from './questions.js';
 import {confirmationMatches} from './translation-checks.js';
 import {VALUE_SCHEMA,valueIssues,factKey} from './values.js';
 import {evidenceUnits,wholeEvidence} from './sentence.js';
 export const VERSION='intake-v3';
 export const FIELDS=['concern','symptoms','duration','severity','medicines','allergies','history','questions'];
 export const LABELS={concern:'Main concern',symptoms:'Reported symptoms',duration:'Onset / duration',severity:'Severity in patient’s words',medicines:'Current medicines',allergies:'Allergies',history:'Reported history',questions:'Patient questions'};
-export const FACT_SCHEMA={type:'object',additionalProperties:false,required:['facts','ambiguities'],properties:{facts:{type:'array',maxItems:24,items:{type:'object',additionalProperties:false,required:['field','quote','sourceId'],properties:{field:{type:'string',enum:FIELDS},quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']},value:VALUE_SCHEMA}}},ambiguities:{type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['quote','sourceId'],properties:{quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}}}};
+export const FACT_SCHEMA={type:'object',additionalProperties:false,required:['facts','ambiguities','questions'],properties:{questions:QUESTION_SCHEMA,facts:{type:'array',maxItems:24,items:{type:'object',additionalProperties:false,required:['field','quote','sourceId'],properties:{field:{type:'string',enum:FIELDS},quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']},value:VALUE_SCHEMA}}},ambiguities:{type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['quote','sourceId'],properties:{quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}}}};
 // Expand only contiguous source tokens to their unique, complete source sentence.
 // This changes quotation boundaries, never the patient's words or the field label.
 export function anchorEvidence(result,sources){
@@ -25,7 +26,8 @@ export function anchorEvidence(result,sources){
 }
 export function validateExtraction(result,sources){
  const errors=[];
- if(!result||typeof result!=='object'||Array.isArray(result)||Object.keys(result).some(k=>!['facts','ambiguities'].includes(k))||!Array.isArray(result.facts)||!Array.isArray(result.ambiguities))return ['Invalid extraction schema'];
+ if(!result||typeof result!=='object'||Array.isArray(result)||Object.keys(result).some(k=>!['facts','ambiguities','questions'].includes(k))||!Array.isArray(result.facts)||!Array.isArray(result.ambiguities))return ['Invalid extraction schema'];
+ if(result.questions!==undefined){if(!Array.isArray(result.questions)||result.questions.length>3)errors.push('Invalid questions');else for(const question of result.questions)errors.push(...questionIssues(question,sources));}
  if(result.facts.length>24||result.ambiguities.length>6)errors.push('Too many results');
  for(const fact of [...result.facts,...result.ambiguities]){
   const keys=result.facts.includes(fact)?['field','quote','sourceId','value']:['quote','sourceId'];
@@ -39,8 +41,9 @@ export function validateExtraction(result,sources){
  const unique=new Set(result.facts.map(f=>JSON.stringify(f)));if(unique.size!==result.facts.length)errors.push('Duplicate fact');
  return errors;
 }
-export function clarify(result){
+export function clarify(result,sources={}){
  const missing=FIELDS.filter(field=>!result.facts.some(f=>f.field===field));
+ const proposed=proposedQuestions(result,sources);if(proposed.length)return {missing,questions:proposed};
  const questions=[];
  if(result.ambiguities.length)questions.push({field:'ambiguities',text:'Please clarify the statements marked as ambiguous below. If unsure, leave them unresolved.'});
  for(const [field,text] of [['duration','When did this concern start?'],['medicines','What medicines are you currently taking, if any?'],['allergies','Do you have any known allergies?']])if(missing.includes(field))questions.push({field,text});

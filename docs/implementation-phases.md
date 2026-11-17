@@ -31,3 +31,9 @@ Added nine value tests covering decimal doses, wrong units, unsupported names, u
 Changed `translation-checks.js`, `agent.js`, `server.mjs`, `app.js`, `index.html`, architecture and packaging. Added back-translation direction, readback, explicit patient confirmation, `translation_confirmed` state and exact-content confirmation records. Source edits invalidate confirmation; exports reject stale/missing confirmation. Manual fallback also requires confirmed source text. Selected number/unit/negation mismatches remain visible review flags.
 
 Added five translation/state/API/export tests, and supplied confirmation records in existing export tests. Checks: 124 tests passed; offline 30/30 valid; build passed. No live back-translation or TTS was called. Confirmation is self-attested; the server asserts stage/confirmation without persisting patient state. Pattern scope and actual patient comprehension require human review.
+
+## Phase 5 — Bounded model follow-ups
+
+Changed `questions.js`, schema/prompt/harness, review rules, UI and packaging. Extraction requests at most three targeted questions in the same model call. Evidence, target fields, shape, length and wording are checked; invalid/empty proposals fall back to fixed templates without a repair call. English stays visible to the operator. Accepted questions translate through the existing route (at most three explicit localization calls); unavailable localization is labelled and its audio control disabled.
+
+Added eight question tests for same-call proposals, unsafe wording, evidence, count and fallback. Checks: 132 tests passed; offline 30/30 valid; build passed. Live provider schema acceptance, generated question usefulness and translation quality remain unverified.
