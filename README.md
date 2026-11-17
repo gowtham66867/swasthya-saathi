@@ -82,7 +82,6 @@ Synthetic prototype for communication support. No diagnosis, prescribing, urgenc
 
 The personal Sarvam account had 2600 available credits before testing. A dedicated app key was created with owner approval and stored in Secret Manager; it was never committed. Live Hindi-to-English translation, generated Hindi speech, and transcription of that generated speech succeeded. The chat endpoint rejected the documentation's `none` reasoning setting; the harness uses `low` and strict `json_schema` output. The corrected extraction returned three valid facts in one call (583 input / 74 output tokens in the direct synthetic test). This is a functional smoke test, not clinical accuracy or a full evaluation. The production access gate remains required. The existing unrelated key was left intact.
 
-
 ## Hackathon improvements and language coverage
 
 The focused workflow is assisted primary-care intake. Patient-facing instructions and missing-detail questions are localized in Hindi, Tamil, Telugu, Kannada and English; clinician review remains in English. Clarification answers can be spoken or typed and translated separately, retaining the original. Telugu and Kannada wording is author-written and still requires fluent-speaker review.

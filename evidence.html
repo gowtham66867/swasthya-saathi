@@ -1,1 +1,204 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Evaluation evidence · Swasthya Saathi</title><link rel="stylesheet" href="/style.css"></head><body class="evidence-page"><main><div class="content"><a class="top-link" href="/">← Patient intake workspace</a><div class="eyebrow">LIVE RESULTS, WITH LIMITS</div><h1>Proof you can inspect.</h1><p class="intro">A functional primary-care intake prototype with a published evaluation record. These are measured API results on fictional inputs, not clinical accuracy or a patient study.</p><div class="evidence-grid"><div class="metric"><strong>30/30</strong><span>Distinct text cases completed · live Sarvam</span></div><div class="metric"><strong>93.0%</strong><span>Exact fact recall · 20-case frozen holdout</span></div><div class="metric"><strong>86.8%</strong><span>Exact fact precision · same holdout</span></div></div><h2>Development versus a frozen holdout</h2><p class="report-note">The first 10 cases were used for prompt refinement. The other 20 were scored once before inspecting failures. Their results remain frozen here. Later retests are labelled regression, not a new holdout.</p><table class="report-table"><thead><tr><th>Metric</th><th>Initial 10 development</th><th>Updated 10 development</th><th>Frozen 20 holdout</th></tr></thead><tbody><tr><th>Exact fact recall</th><td>83.3%</td><td>96.7%</td><td>93.0%</td></tr><tr><th>Exact fact precision</th><td>92.6%</td><td>80.6%</td><td>86.8%</td></tr><tr><th>Negation exact match</th><td>50.0%</td><td>See raw report</td><td>91.7%</td></tr><tr><th>Unknown preservation</th><td>98.1%</td><td>See raw report</td><td>98.9%</td></tr><tr><th>Ambiguity quote recall</th><td>50.0%</td><td>See raw report</td><td>0.0%</td></tr><tr><th>p95 latency</th><td>889 ms</td><td>See raw report</td><td>805 ms</td></tr></tbody></table><div class="review-note">Known weakness: the model misses some uncertainty and contradiction labels and can assign quotes to extra categories. Matching a real sentence does not establish a correct clinical interpretation. The review screen separately flags explicit correction language, family context, uncertainty, and instruction-like text. These rules do not detect every clinical contradiction.</div><h2>Four-language speech pipeline</h2><p class="report-note">Bulbul-generated speech → Saaras transcription → English translation → extraction. Six author-written cases per language. Synthetic quiet audio from the same provider is easier than real people speaking in a clinic. CER is a normalized character error rate; lower is better. Lexical critical checks cover selected numbers and denials, not full semantic correctness. Speech-only success excludes the extraction step. Failed extractions were rechecked using saved translations; earlier successful rows were retained. Latency includes the original attempt plus recheck where applicable, not a fresh pipeline benchmark.</p><div class="table-scroll"><table class="report-table"><thead><tr><th>Language</th><th>Full pipeline</th><th>Speech + translation</th><th>CER on speech successes</th><th>Critical probes</th><th>p95</th></tr></thead><tbody><tr><th>hi-IN</th><td>5/6</td><td>6/6</td><td>7.0%</td><td>7/7</td><td>4.13 s</td></tr><tr><th>ta-IN</th><td>5/6</td><td>6/6</td><td>14.4%</td><td>6/7</td><td>7.75 s</td></tr><tr><th>te-IN</th><td>6/6</td><td>6/6</td><td>9.2%</td><td>7/7</td><td>3.54 s</td></tr><tr><th>kn-IN</th><td>6/6</td><td>6/6</td><td>6.2%</td><td>6/7</td><td>19.52 s</td></tr></tbody></table></div><h3>Failures remain visible</h3><ul><li class="report-note">hi-IN-allergy-denial: validation</li><li class="report-note">ta-IN-allergy-denial: validation</li><li class="report-note">ta-IN-vague: lexical critical check failed</li><li class="report-note">kn-IN-vague: lexical critical check failed</li></ul><h2>Cost and usage</h2><p class="report-note">Frozen text run: ₹0.356 from 27742 input and 3151 output tokens. Speech evaluation estimate: ₹6.688. These are estimates from recorded successful usage at published pay-as-you-go rates, excluding GST, cloud costs, failed-call billing, earlier attempts and any cache discount. They are not a measured account-balance debit. <a href="https://docs.sarvam.ai/api/getting-started/pricing">Pricing source</a>.</p><h2>Post-review regression retest</h2><p class="report-note">intake-v2.2 on the same 30 previously seen cases. Recall 94.1%, precision 88.0%. This is not fresh generalization evidence.</p><h2>Human validation still required</h2><p class="report-note">No clinician has adjudicated these labels or accepted a real patient handoff. Native-language wording requires fluent review. Manual intake time savings have not been measured. The app includes a same-case self-timing tool; it does not fabricate a percentage improvement.</p><p><a href="/evaluation.json">Download machine-readable summary</a> · <a href="https://github.com/gowtham66867/swasthya-saathi/tree/main/evals/results">Inspect complete synthetic results in GitHub (private)</a></p><footer>Measured on synthetic data · 2026-11-17T16:42:52.747Z · No clinical validation claim.</footer></div></main></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Evaluation evidence · Swasthya Saathi</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body class="evidence-page">
+    <main>
+      <div class="content">
+        <a class="top-link" href="/">← Patient intake workspace</a>
+        <div class="eyebrow">LIVE RESULTS, WITH LIMITS</div>
+        <h1>Proof you can inspect.</h1>
+        <p class="intro">
+          A functional primary-care intake prototype with a published evaluation
+          record. These are measured API results on fictional inputs, not
+          clinical accuracy or a patient study.
+        </p>
+        <div class="evidence-grid">
+          <div class="metric">
+            <strong>30/30</strong
+            ><span>Distinct text cases completed · live Sarvam</span>
+          </div>
+          <div class="metric">
+            <strong>93.0%</strong
+            ><span>Exact fact recall · 20-case frozen holdout</span>
+          </div>
+          <div class="metric">
+            <strong>86.8%</strong
+            ><span>Exact fact precision · same holdout</span>
+          </div>
+        </div>
+        <h2>Development versus a frozen holdout</h2>
+        <p class="report-note">
+          The first 10 cases were used for prompt refinement. The other 20 were
+          scored once before inspecting failures. Their results remain frozen
+          here. Later retests are labelled regression, not a new holdout.
+        </p>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Initial 10 development</th>
+              <th>Updated 10 development</th>
+              <th>Frozen 20 holdout</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Exact fact recall</th>
+              <td>83.3%</td>
+              <td>96.7%</td>
+              <td>93.0%</td>
+            </tr>
+            <tr>
+              <th>Exact fact precision</th>
+              <td>92.6%</td>
+              <td>80.6%</td>
+              <td>86.8%</td>
+            </tr>
+            <tr>
+              <th>Negation exact match</th>
+              <td>50.0%</td>
+              <td>See raw report</td>
+              <td>91.7%</td>
+            </tr>
+            <tr>
+              <th>Unknown preservation</th>
+              <td>98.1%</td>
+              <td>See raw report</td>
+              <td>98.9%</td>
+            </tr>
+            <tr>
+              <th>Ambiguity quote recall</th>
+              <td>50.0%</td>
+              <td>See raw report</td>
+              <td>0.0%</td>
+            </tr>
+            <tr>
+              <th>p95 latency</th>
+              <td>889 ms</td>
+              <td>See raw report</td>
+              <td>805 ms</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="review-note">
+          Known weakness: the model misses some uncertainty and contradiction
+          labels and can assign quotes to extra categories. Matching a real
+          sentence does not establish a correct clinical interpretation. The
+          review screen separately flags explicit correction language, family
+          context, uncertainty, and instruction-like text. These rules do not
+          detect every clinical contradiction.
+        </div>
+        <h2>Four-language speech pipeline</h2>
+        <p class="report-note">
+          Bulbul-generated speech → Saaras transcription → English translation →
+          extraction. Six author-written cases per language. Synthetic quiet
+          audio from the same provider is easier than real people speaking in a
+          clinic. CER is a normalized character error rate; lower is better.
+          Lexical critical checks cover selected numbers and denials, not full
+          semantic correctness. Speech-only success excludes the extraction
+          step. Failed extractions were rechecked using saved translations;
+          earlier successful rows were retained. Latency includes the original
+          attempt plus recheck where applicable, not a fresh pipeline benchmark.
+        </p>
+        <div class="table-scroll">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Language</th>
+                <th>Full pipeline</th>
+                <th>Speech + translation</th>
+                <th>CER on speech successes</th>
+                <th>Critical probes</th>
+                <th>p95</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>hi-IN</th>
+                <td>5/6</td>
+                <td>6/6</td>
+                <td>7.0%</td>
+                <td>7/7</td>
+                <td>4.13 s</td>
+              </tr>
+              <tr>
+                <th>ta-IN</th>
+                <td>5/6</td>
+                <td>6/6</td>
+                <td>14.4%</td>
+                <td>6/7</td>
+                <td>7.75 s</td>
+              </tr>
+              <tr>
+                <th>te-IN</th>
+                <td>6/6</td>
+                <td>6/6</td>
+                <td>9.2%</td>
+                <td>7/7</td>
+                <td>3.54 s</td>
+              </tr>
+              <tr>
+                <th>kn-IN</th>
+                <td>6/6</td>
+                <td>6/6</td>
+                <td>6.2%</td>
+                <td>6/7</td>
+                <td>19.52 s</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Failures remain visible</h3>
+        <ul>
+          <li class="report-note">hi-IN-allergy-denial: validation</li>
+          <li class="report-note">ta-IN-allergy-denial: validation</li>
+          <li class="report-note">
+            ta-IN-vague: lexical critical check failed
+          </li>
+          <li class="report-note">
+            kn-IN-vague: lexical critical check failed
+          </li>
+        </ul>
+        <h2>Cost and usage</h2>
+        <p class="report-note">
+          Frozen text run: ₹0.356 from 27742 input and 3151 output tokens.
+          Speech evaluation estimate: ₹6.688. These are estimates from recorded
+          successful usage at published pay-as-you-go rates, excluding GST,
+          cloud costs, failed-call billing, earlier attempts and any cache
+          discount. They are not a measured account-balance debit.
+          <a href="https://docs.sarvam.ai/api/getting-started/pricing"
+            >Pricing source</a
+          >.
+        </p>
+        <h2>Post-review regression retest</h2>
+        <p class="report-note">
+          intake-v2.2 on the same 30 previously seen cases. Recall 94.1%,
+          precision 88.0%. This is not fresh generalization evidence.
+        </p>
+        <h2>Human validation still required</h2>
+        <p class="report-note">
+          No clinician has adjudicated these labels or accepted a real patient
+          handoff. Native-language wording requires fluent review. Manual intake
+          time savings have not been measured. The app includes a same-case
+          self-timing tool; it does not fabricate a percentage improvement.
+        </p>
+        <p>
+          <a href="/evaluation.json">Download machine-readable summary</a> ·
+          <a
+            href="https://github.com/gowtham66867/swasthya-saathi/tree/main/evals/results"
+            >Inspect complete synthetic results in GitHub (private)</a
+          >
+        </p>
+        <footer>
+          Measured on synthetic data · 2026-11-17T16:42:52.747Z · No clinical
+          validation claim.
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>

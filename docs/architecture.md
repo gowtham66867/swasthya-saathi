@@ -25,16 +25,16 @@ The diagram's clarification loop is bounded by the page to one pass. The model h
 
 ## Modules
 
-| Module | Responsibility |
-| --- | --- |
-| `app.js` | Recording, cancellation, review, rendering and ephemeral workflow |
-| `agent.js` | State machine, schema, source validation, questions and export |
-| `harness.mjs` | Fixed extraction plan, response validation, retry/repair ceiling and usage |
-| `prompts/` | Versioned model prompt and published schema |
-| `server.mjs` | Same-origin, consent and token gate; Sarvam API routes |
-| `scripts/dev.mjs` | Node HTTP adapter, streaming size cap, timeout and shared limits |
-| `scripts/build.mjs` | Static asset packaging and server dependency copying |
-| `evals/` | Synthetic labels, fixture consistency and opt-in live grading |
+| Module              | Responsibility                                                             |
+| ------------------- | -------------------------------------------------------------------------- |
+| `app.js`            | Recording, cancellation, review, rendering and ephemeral workflow          |
+| `agent.js`          | State machine, schema, source validation, questions and export             |
+| `harness.mjs`       | Fixed extraction plan, response validation, retry/repair ceiling and usage |
+| `prompts/`          | Versioned model prompt and published schema                                |
+| `server.mjs`        | Same-origin, consent and token gate; Sarvam API routes                     |
+| `scripts/dev.mjs`   | Node HTTP adapter, streaming size cap, timeout and shared limits           |
+| `scripts/build.mjs` | Static asset packaging and server dependency copying                       |
+| `evals/`            | Synthetic labels, fixture consistency and opt-in live grading              |
 
 ## Evidence and trust
 
@@ -52,7 +52,6 @@ At most three model calls per extraction, one optional clarification pass, 2200 
 
 Thirty fixtures cover ten scenarios translated into three language pairs. Offline replay cannot validate model performance. Live text extraction, translation and speech evaluations are separate future measurements. Browser tests exercise the sample workflow and invalidation; provider tests use mocks until keys are configured.
 
-
 ## Review and localization additions
 
 `locale.js` supplies five patient locales; `review-tools.js` owns transparent, deterministic review flags and comparable timing calculations. English clinician review includes original clarification answers and their separately translated source. A reviewer reference, critical-detail check and explicit approval gate exports. Manual fallback has no extracted facts until an operator records corrections.
@@ -60,7 +59,6 @@ Thirty fixtures cover ten scenarios translated into three language pairs. Offlin
 The extraction harness anchors a proposed contiguous token sequence to a unique full source sentence before validation. This preserves negation, qualifiers and dose numbers in the original sentence without accepting paraphrases. Anchoring cannot establish the correctness of the assigned category. Review rules reject instruction-like sentences and flag selected explicit corrections and uncertainty; they are not a clinical reasoning agent.
 
 `evals/benchmark.mjs` separates development, frozen holdout and later regression retests. `evals/speech-live.mjs` measures four languages with synthetic audio and bounded provider retries. Published evidence keeps failures visible, labels reused translations in rechecks, and distinguishes estimates from actual credit debits. A prepared human-validation protocol is in `validation-kit.md`.
-
 
 ## Translation confirmation
 

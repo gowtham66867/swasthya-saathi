@@ -1,21 +1,154 @@
-import {readFile,writeFile,mkdir} from 'node:fs/promises';
-import {runExtraction} from '../harness.mjs';
-import {validateExtraction,VERSION,FIELDS} from '../agent.js';
-if(process.env.EVAL_LIVE!=='yes'||!process.env.SARVAM_API_KEY)throw Error('Requires EVAL_LIVE=yes and SARVAM_API_KEY.');
-const baseline=process.argv.includes('--baseline');const regression=process.argv.includes('--regression');const cases=JSON.parse(await readFile(new URL('./cases.v2.json',import.meta.url),'utf8')).filter(c=>!baseline||c.split==='development');
-const path=new URL(baseline?'./results/v3-development-on-seen-cases.json':regression?'./results/v3-regression-on-seen-cases.json':'./results/v3-on-seen-cases.json',import.meta.url);await mkdir(new URL('./results/',import.meta.url),{recursive:true});
-const runs=[];
-const key=f=>JSON.stringify([f.field,f.quote,f.sourceId]);
-for(const c of cases){
- let output,error;const started=Date.now();try{output=await runExtraction({english:c.english,clarifications:''},{key:process.env.SARVAM_API_KEY});}catch(e){error=e.code||'request';output={meta:e.meta};}
- const actual=new Set((output?.result?.facts||[]).map(key)),expected=new Set(c.expected.facts.map(key));const tp=[...actual].filter(x=>expected.has(x)).length,fp=actual.size-tp,fn=expected.size-tp;
- const unknown=FIELDS.filter(f=>!c.expected.facts.some(x=>x.field===f));const neg=c.expected.facts.filter(f=>/\b(no|not|never)\b/.test(f.quote));
- runs.push({id:c.id,split:c.split,tags:c.tags,error,result:output?.result,meta:output?.meta,elapsedMs:Date.now()-started,tp,fp,fn,expectedFacts:expected.size,valid:!!output?.result&&!validateExtraction(output.result,{english:c.english,clarifications:''}).length,unknownTotal:unknown.length,unknownCorrect:unknown.filter(f=>!output?.result?.facts.some(x=>x.field===f)).length,negationTotal:neg.length,negationCorrect:neg.filter(f=>actual.has(key(f))).length,ambiguityExpected:c.expected.ambiguities.length,ambiguityMatched:c.expected.ambiguities.filter(a=>output?.result?.ambiguities.some(x=>x.sourceId===a.sourceId&&x.quote===a.quote)).length,questionCount:output?.questions?.length});
- await writeFile(path,JSON.stringify({status:'running',version:VERSION,runs},null,2));console.log(`${runs.length}/${cases.length} ${c.id} ${error||'completed'} exact facts ${tp}/${expected.size}`);
- if(runs.slice(-3).length===3&&runs.slice(-3).every(r=>r.error))throw Error('Stopped after three consecutive provider/validation failures; partial results saved.');
- await new Promise(r=>setTimeout(r,1100));
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { runExtraction } from "../harness.mjs";
+import { validateExtraction, VERSION, FIELDS } from "../agent.js";
+if (process.env.EVAL_LIVE !== "yes" || !process.env.SARVAM_API_KEY)
+  throw Error("Requires EVAL_LIVE=yes and SARVAM_API_KEY.");
+const baseline = process.argv.includes("--baseline");
+const regression = process.argv.includes("--regression");
+const cases = JSON.parse(
+  await readFile(new URL("./cases.v2.json", import.meta.url), "utf8"),
+).filter((c) => !baseline || c.split === "development");
+const path = new URL(
+  baseline
+    ? "./results/v3-development-on-seen-cases.json"
+    : regression
+      ? "./results/v3-regression-on-seen-cases.json"
+      : "./results/v3-on-seen-cases.json",
+  import.meta.url,
+);
+await mkdir(new URL("./results/", import.meta.url), { recursive: true });
+const runs = [];
+const key = (f) => JSON.stringify([f.field, f.quote, f.sourceId]);
+for (const c of cases) {
+  let output, error;
+  const started = Date.now();
+  try {
+    output = await runExtraction(
+      { english: c.english, clarifications: "" },
+      { key: process.env.SARVAM_API_KEY },
+    );
+  } catch (e) {
+    error = e.code || "request";
+    output = { meta: e.meta };
+  }
+  const actual = new Set((output?.result?.facts || []).map(key)),
+    expected = new Set(c.expected.facts.map(key));
+  const tp = [...actual].filter((x) => expected.has(x)).length,
+    fp = actual.size - tp,
+    fn = expected.size - tp;
+  const unknown = FIELDS.filter(
+    (f) => !c.expected.facts.some((x) => x.field === f),
+  );
+  const neg = c.expected.facts.filter((f) =>
+    /\b(no|not|never)\b/.test(f.quote),
+  );
+  runs.push({
+    id: c.id,
+    split: c.split,
+    tags: c.tags,
+    error,
+    result: output?.result,
+    meta: output?.meta,
+    elapsedMs: Date.now() - started,
+    tp,
+    fp,
+    fn,
+    expectedFacts: expected.size,
+    valid:
+      !!output?.result &&
+      !validateExtraction(output.result, {
+        english: c.english,
+        clarifications: "",
+      }).length,
+    unknownTotal: unknown.length,
+    unknownCorrect: unknown.filter(
+      (f) => !output?.result?.facts.some((x) => x.field === f),
+    ).length,
+    negationTotal: neg.length,
+    negationCorrect: neg.filter((f) => actual.has(key(f))).length,
+    ambiguityExpected: c.expected.ambiguities.length,
+    ambiguityMatched: c.expected.ambiguities.filter((a) =>
+      output?.result?.ambiguities.some(
+        (x) => x.sourceId === a.sourceId && x.quote === a.quote,
+      ),
+    ).length,
+    questionCount: output?.questions?.length,
+  });
+  await writeFile(
+    path,
+    JSON.stringify({ status: "running", version: VERSION, runs }, null, 2),
+  );
+  console.log(
+    `${runs.length}/${cases.length} ${c.id} ${error || "completed"} exact facts ${tp}/${expected.size}`,
+  );
+  if (runs.slice(-3).length === 3 && runs.slice(-3).every((r) => r.error))
+    throw Error(
+      "Stopped after three consecutive provider/validation failures; partial results saved.",
+    );
+  await new Promise((r) => setTimeout(r, 1100));
 }
-const sum=(rows,k)=>rows.reduce((n,r)=>n+(r[k]||0),0),ratio=(a,b)=>b?a/b:null;
-function metrics(rows){const lat=rows.map(r=>r.elapsedMs).sort((a,b)=>a-b);const input=rows.reduce((n,r)=>n+(r.meta?.usage.input||0),0),output=rows.reduce((n,r)=>n+(r.meta?.usage.output||0),0);return {cases:rows.length,completed:rows.filter(r=>!r.error).length,completionRate:ratio(rows.filter(r=>!r.error).length,rows.length),schemaEvidenceValid:sum(rows,'valid'),factPrecision:ratio(sum(rows,'tp'),sum(rows,'tp')+sum(rows,'fp')),factRecall:ratio(sum(rows,'tp'),sum(rows,'tp')+sum(rows,'fn')),extraLabelledFactRate:ratio(sum(rows,'fp'),sum(rows,'tp')+sum(rows,'fp')),negationExactMatch:ratio(sum(rows,'negationCorrect'),sum(rows,'negationTotal')),unknownPreservation:ratio(sum(rows,'unknownCorrect'),sum(rows,'unknownTotal')),ambiguityRecall:ratio(sum(rows,'ambiguityMatched'),sum(rows,'ambiguityExpected')),p50Ms:lat[Math.floor(lat.length*.5)],p95Ms:lat[Math.min(lat.length-1,Math.ceil(lat.length*.95)-1)],calls:rows.reduce((n,r)=>n+(r.meta?.calls||0),0),repairCases:rows.filter(r=>r.meta?.repair).length,inputTokens:input,outputTokens:output,estimatedINR:(input*10+output*25)/1e6};}
-const report={status:'complete',kind:'live synthetic English extraction',version:VERSION,date:new Date().toISOString(),model:'sarvam-105b',dataset:regression?'cases.v2 regression retest (previously seen labels; NOT a fresh holdout)':'cases.v2 (30 distinct English cases; 10 development + 20 holdout)',pricing:'Estimated INR at published pay-as-you-go rates ₹10 input/₹25 output per million tokens, no cache discount, excludes GST and cloud costs. Usage for rejected/failed responses may be incomplete.',summary:metrics(runs),holdout:baseline||regression?null:metrics(runs.filter(r=>r.split==='holdout')),limitations:['Author-labelled synthetic cases; no clinician adjudication.','Strict exact-span agreement can penalize semantically valid alternate classification.','Matching source evidence does not prove clinical correctness.','Failed cases count as missed expected facts; reported coverage includes failures.','Latency includes validation and retries, from local evaluator, not patient network.'],runs};
-await writeFile(path,JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report.summary,null,2));
+const sum = (rows, k) => rows.reduce((n, r) => n + (r[k] || 0), 0),
+  ratio = (a, b) => (b ? a / b : null);
+function metrics(rows) {
+  const lat = rows.map((r) => r.elapsedMs).sort((a, b) => a - b);
+  const input = rows.reduce((n, r) => n + (r.meta?.usage.input || 0), 0),
+    output = rows.reduce((n, r) => n + (r.meta?.usage.output || 0), 0);
+  return {
+    cases: rows.length,
+    completed: rows.filter((r) => !r.error).length,
+    completionRate: ratio(rows.filter((r) => !r.error).length, rows.length),
+    schemaEvidenceValid: sum(rows, "valid"),
+    factPrecision: ratio(sum(rows, "tp"), sum(rows, "tp") + sum(rows, "fp")),
+    factRecall: ratio(sum(rows, "tp"), sum(rows, "tp") + sum(rows, "fn")),
+    extraLabelledFactRate: ratio(
+      sum(rows, "fp"),
+      sum(rows, "tp") + sum(rows, "fp"),
+    ),
+    negationExactMatch: ratio(
+      sum(rows, "negationCorrect"),
+      sum(rows, "negationTotal"),
+    ),
+    unknownPreservation: ratio(
+      sum(rows, "unknownCorrect"),
+      sum(rows, "unknownTotal"),
+    ),
+    ambiguityRecall: ratio(
+      sum(rows, "ambiguityMatched"),
+      sum(rows, "ambiguityExpected"),
+    ),
+    p50Ms: lat[Math.floor(lat.length * 0.5)],
+    p95Ms: lat[Math.min(lat.length - 1, Math.ceil(lat.length * 0.95) - 1)],
+    calls: rows.reduce((n, r) => n + (r.meta?.calls || 0), 0),
+    repairCases: rows.filter((r) => r.meta?.repair).length,
+    inputTokens: input,
+    outputTokens: output,
+    estimatedINR: (input * 10 + output * 25) / 1e6,
+  };
+}
+const report = {
+  status: "complete",
+  kind: "live synthetic English extraction",
+  version: VERSION,
+  date: new Date().toISOString(),
+  model: "sarvam-105b",
+  dataset: regression
+    ? "cases.v2 regression retest (previously seen labels; NOT a fresh holdout)"
+    : "cases.v2 (30 distinct English cases; 10 development + 20 holdout)",
+  pricing:
+    "Estimated INR at published pay-as-you-go rates ₹10 input/₹25 output per million tokens, no cache discount, excludes GST and cloud costs. Usage for rejected/failed responses may be incomplete.",
+  summary: metrics(runs),
+  holdout:
+    baseline || regression
+      ? null
+      : metrics(runs.filter((r) => r.split === "holdout")),
+  limitations: [
+    "Author-labelled synthetic cases; no clinician adjudication.",
+    "Strict exact-span agreement can penalize semantically valid alternate classification.",
+    "Matching source evidence does not prove clinical correctness.",
+    "Failed cases count as missed expected facts; reported coverage includes failures.",
+    "Latency includes validation and retries, from local evaluator, not patient network.",
+  ],
+  runs,
+};
+await writeFile(path, JSON.stringify(report, null, 2) + "\n");
+console.log(JSON.stringify(report.summary, null, 2));

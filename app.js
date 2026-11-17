@@ -1,98 +1,815 @@
-import {translationSignals,confirmationMatches} from './translation-checks.js';
-import {factKey} from './values.js';
-import {tr,applyLocale} from './locale.js';
-import {applyReviewRules,reviewOverview,timingObservation,canApprove} from './review-tools.js';
-import {VERSION,Workflow,FIELDS,LABELS,validateExtraction,clarify,handoff,retainAnswers} from './agent.js';
-import {CASES} from './sample-cases.js';
-const $=id=>document.getElementById(id);
-const flow=new Workflow();let ready=false,mode='manual',loaded=null,result=null,clarifications='',corrections={},valueCorrections={},busy=false,controller=null,recording=null,stream=null,timer=null,audioUrl=null,requestSerial=0;
-let backTranslation='',backRead=false,translationConfirmation=null;
-let startedAt=null,assistedMs=null,manualStarted=null,manualMs=null,manualCaseId=null,originalAnswers='',signals=[],reviewPacket=null;
-const t=key=>tr($('language').value,key);
-const localizedStatus={"Fictional case loaded. Translation and extraction are prewritten; no API calls.":'sampleLoaded',"Facts ready. Verify the full quotes and their categories.":'factsReady',"Ready for human review. Unanswered details remain unknown.":'reviewReady',"Session cleared.":'cleared',"Transcript ready. Review and translate.":'recorded',"Translation ready. Check numbers, negations, and names.":'translated',"Translating with Sarvam…":'translating',"Extracting evidence with Sarvam…":'extracting',"Checking clarification evidence…":'saving'};
-const status=message=>{$('status').textContent=localizedStatus[message]?t(localizedStatus[message]):message;};
-function observeStart(){if(startedAt===null){startedAt=performance.now();assistedMs=null;}}
-function downloadObject(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function invalidateReviewer(){clearApproval();if(['approved','exported'].includes(flow.state)){flow.state='awaiting_review';renderState();}}
-const renderState=()=>{$('workflow').textContent=flow.state;};
-function move(state){flow.move(state);renderState();}
-function cleanAudio(){if(audioUrl)URL.revokeObjectURL(audioUrl);audioUrl=null;$('audio').pause();$('audio').removeAttribute('src');$('audio').hidden=true;}
-function clearApproval(){ $('critical-reviewed').checked=false;$('reviewed').checked=false;$('summary-box').hidden=true;$('summary').textContent='';reviewPacket=null; }
-function resetDerived(){backTranslation='';backRead=false;translationConfirmation=null;$('back-words').textContent='';$('translation-agreed').checked=false;$('translation-flags').textContent='';controller?.abort();requestSerial++;flow.reset();renderState();result=null;clarifications='';corrections={};valueCorrections={};signals=[];originalAnswers='';$('overview').hidden=true;$('clarification-source').hidden=true;$('facts').replaceChildren();$('questions').replaceChildren();$('clarification-panel').hidden=true;$('agent-meta').textContent='';clearApproval();cleanAudio();}
-function translatedState(){flow.reset();move('consented');move('transcribed');move('translated');}
-function populateCases(){const options=CASES.filter(c=>c.language===$('language').value);$('sample').disabled=!options.length;$('case').disabled=!options.length;$('case').replaceChildren(...options.map(c=>new Option(c.id.split('-').slice(2).join('-'),c.id)));}
-function requireConsent(){if(!$('consent').checked)throw Error(t('noConsent'));if(!ready)throw Error('Live Sarvam is not configured. Try a fictional sample case.');if(!$('access').value)throw Error('Enter the deployment owner’s live access token.');}
-async function api(path,body,signal){const isForm=body instanceof FormData;const r=await fetch('/api/'+path,{method:'POST',headers:{...(isForm?{}:{'Content-Type':'application/json'}),'X-Patient-Consent':'yes',Authorization:'Bearer '+$('access').value},body:isForm?body:JSON.stringify(body),signal});const data=await r.json();if(!r.ok)throw Error(data.error||'Processing failed.');return data;}
-function setBusy(value){busy=value;document.querySelectorAll('button').forEach(b=>b.disabled=(value&&b.id!=='cancel')||b.dataset.unavailable==='true');document.querySelectorAll('input,textarea,select').forEach(e=>e.disabled=value);}
-async function task(fn){if(busy||recording)return;controller=new AbortController();const signal=controller.signal;const serial=++requestSerial;setBusy(true);try{await fn(signal,()=>{if(signal.aborted||serial!==requestSerial)throw new DOMException('Cancelled','AbortError');});}catch(e){if(e.name==='AbortError'){status('Processing cancelled. Retry explicitly when ready.');}else{clearApproval();if(['translated','translation_confirmed','clarifying'].includes(flow.state))move('failed');status(e.message);}}finally{controller=null;setBusy(false);}}
-function loadSample(){resetDerived();loaded=CASES.find(c=>c.id===$('case').value);if(!loaded)return status('Fictional samples are available in English, Hindi, Tamil, Telugu, and Kannada.');mode='sample';startedAt=performance.now();assistedMs=null;$('transcript').value=loaded.original;$('english').value=loaded.english;translatedState();$('source').textContent='Prewritten sample';status('Fictional case loaded. Translation and extraction are prewritten; no API calls.');}
-function edited(original=false){observeStart();resetDerived();loaded=null;mode='manual';$('source').textContent='Operator edited';if(original)$('english').value='';if($('english').value.trim())translatedState();else{move('consented');move('transcribed');}status('Text changed. Extract again and review before export.');}
-function renderFacts(){
- $('facts').replaceChildren();const pending=clarify(result,{english:$('english').value,clarifications});const overview=reviewOverview(result,corrections);$('overview').hidden=false;$('overview').replaceChildren();for(const text of [`${overview.known.length}/8 fields reported · ${overview.unknown.length} unknown`,...signals.map(s=>`${s.text} “${s.quote}” (${s.sourceId})`)]){const p=document.createElement('p');p.textContent=text;$('overview').append(p);}
- for(const field of FIELDS){const card=document.createElement('section');card.className='fact-card';const h=document.createElement('h3');h.textContent=LABELS[field];card.append(h);const facts=result.facts.filter(f=>f.field===field);
- if(!facts.length){const p=document.createElement('p');p.className='unknown';p.textContent=t('unknown');card.append(p);}
- for(const f of facts){const q=document.createElement('blockquote');q.textContent=f.quote;const small=document.createElement('small');small.textContent=`Evidence: ${f.sourceId} · ${f.sourceId==='clarifications'?'operator-recorded answer':mode==='sample'?'sample fixture':'extracted'} · classification requires review`;card.append(q,small);
- if(f.value){const label=document.createElement('label');label.textContent='Proposed — verify against quote';const input=document.createElement('input');input.maxLength=500;input.value=valueCorrections[factKey(f)]||JSON.stringify(f.value);input.addEventListener('input',()=>{valueCorrections[factKey(f)]=input.value;invalidateReviewer();});label.append(input);card.append(label);}
- }
- const label=document.createElement('label');label.textContent='Optional operator correction';const input=document.createElement('input');input.maxLength=500;input.placeholder='Keep evidence above, or record a correction';input.value=corrections[field]||'';input.addEventListener('input',()=>{corrections[field]=input.value;clearApproval();if(['approved','exported'].includes(flow.state)){flow.state='awaiting_review';renderState();}});label.append(input);card.append(label);$('facts').append(card);}
- if(result.ambiguities.length){const warn=document.createElement('p');warn.className='review-note';warn.textContent='Unresolved / ambiguous: '+result.ambiguities.map(a=>`“${a.quote}”`).join(' · ');$('facts').append(warn);}
- return pending;
-}
-async function extractionReady(data,signal,check=()=>{}){result=data.result;const errors=validateExtraction(result,{original:$('transcript').value,english:$('english').value,clarifications});if(errors.length)throw Error('Invalid evidence. Review text and retry.');const checked=applyReviewRules(result,{original:$('transcript').value,english:$('english').value,clarifications});result=checked.result;signals=[...checked.signals,...translationSignals($('transcript').value,$('english').value),...(data.valueFlags||[]),...(data.questionFlags||[])];move('extracted');const pending=renderFacts();$('agent-meta').textContent=data.meta?`${data.meta.mode} · ${data.meta.calls} calls · ${data.meta.latencyMs} ms · prompt ${VERSION}`:mode==='manual-review'?'Manual operator review · no model calls':'Prewritten sample extraction · no model calls';$('questions').replaceChildren();
- for(const question of pending.questions){const label=document.createElement('label');let patientQuestion=t(question.field);let questionLocalized=true;if(question.proposed){patientQuestion=question.text;if($('language').value!=='en-IN'){try{requireConsent();const translated=await api('translate',{text:question.text,language:$('language').value,direction:'back'},signal);check();patientQuestion=translated.translated_text;}catch(e){if(e.name==='AbortError')throw e;questionLocalized=false;patientQuestion='Intake worker: translate the English question below for the patient.';}}}label.textContent=patientQuestion;if(question.proposed){const english=document.createElement('small');english.textContent='Operator: '+question.text+' · Evidence: '+question.quote;label.append(english);}const input=document.createElement('textarea');input.rows=2;input.maxLength=300;input.dataset.field=question.field;input.placeholder=t('optional');const listen=document.createElement('button');listen.type='button';listen.className='text-button';listen.textContent=t('listen');listen.disabled=!questionLocalized;if(!questionLocalized)listen.dataset.unavailable='true';listen.onclick=()=>speakText(patientQuestion);const recordAnswer=document.createElement('button');recordAnswer.type='button';recordAnswer.className='text-button';recordAnswer.textContent=t('answer');recordAnswer.onclick=()=>startCapture(input,recordAnswer);label.append(input,listen,recordAnswer);$('questions').append(label);}
- if(pending.questions.length){move('clarifying');$('clarification-panel').hidden=false;}else move('awaiting_review');status('Facts ready. Verify the full quotes and their categories.');}
-$('sample').onclick=loadSample;$('case').onchange=()=>{resetDerived();$('transcript').value='';$('english').value='';loaded=null;mode='manual';status('Choose Try a sample case to load the selected fictional case.');};
-$('language').onchange=()=>{resetDerived();populateCases();applyLocale($('language').value);startedAt=null;assistedMs=null;$('transcript').value='';$('english').value='';loaded=null;mode='manual';$('source').textContent='No case loaded';status('Language changed. Record, type, or load a sample.');};
-$('transcript').oninput=()=>edited(true);$('english').oninput=()=>edited(false);$('patient').oninput=()=>{clearApproval();if(['approved','exported'].includes(flow.state)){flow.state='awaiting_review';renderState();}};
-$('consent').onchange=()=>{if(!$('consent').checked){controller?.abort();if(recording)recording.stop();clearApproval();}};
-$('translate').onclick=()=>task(async(signal,check)=>{const text=$('transcript').value.trim();if(!text)throw Error('Enter patient words first.');if($('language').value==='en-IN'){resetDerived();$('english').value=text;mode='manual';translatedState();return status('English source copied. Review before extraction.');}requireConsent();clearApproval();status('Translating with Sarvam…');const data=await api('translate',{text,language:$('language').value},signal);check();resetDerived();$('english').value=data.translated_text;mode='live';loaded=null;translatedState();$('source').textContent='Sarvam translation';status('Translation ready. Check numbers, negations, and names.');});
-$('extract').onclick=()=>task(async(signal,check)=>{if(!$('english').value.trim()||!$('transcript').value.trim())throw Error('Review original words and English text first.');clearApproval();clarifications='';corrections={};valueCorrections={};if(!confirmationMatches(translationConfirmation,$('transcript').value,$('english').value)||flow.state!=='translation_confirmed')throw Error('Read back and confirm the translation before extraction.');if(mode==='sample'&&loaded){await extractionReady({result:structuredClone(loaded.expected)},signal,check);return;}requireConsent();status('Extracting evidence with Sarvam…');const data=await api('extract',{original:$('transcript').value,text:$('english').value,stage:flow.state,translationConfirmed:true},signal);check();await extractionReady(data,signal,check);});
-$('clarify').onclick=()=>task(async(signal,check)=>{if(flow.state!=='clarifying')throw Error('Extract facts first.');const answers=[...$('questions').querySelectorAll('textarea')].map(el=>({field:el.dataset.field,text:el.value.trim()})).filter(x=>x.text);originalAnswers=answers.map(a=>`${a.field}: ${a.text}`).join('\n');if(answers.length&&mode!=='sample'&&$('language').value!=='en-IN'){requireConsent();for(const answer of answers){const translated=await api('translate',{text:answer.text,language:$('language').value},signal);check();answer.text=translated.translated_text;}}clarifications=answers.map(a=>`${a.field}: ${a.text}`).join('\n');
- if(answers.length&&mode!=='sample'){requireConsent();status('Checking clarification evidence…');const data=await api('extract',{original:$('transcript').value,text:$('english').value,clarifications,stage:'clarifying',translationConfirmed:Boolean(translationConfirmation?.confirmed)},signal);check();if(validateExtraction(data.result,{original:$('transcript').value,english:$('english').value,clarifications}).length)throw Error('Clarification evidence is invalid.');result=data.result;$('agent-meta').textContent=`${data.meta.mode} · clarification pass · ${data.meta.calls} calls`;}
- else if(answers.length){status('Sample answers recorded verbatim under operator-selected fields. No AI call.');}
- result=retainAnswers(result,answers);if(validateExtraction(result,{original:$('transcript').value,english:$('english').value,clarifications}).length)throw Error('Clarification evidence is invalid. Review and extract again.');
- const checked=applyReviewRules(result,{original:$('transcript').value,english:$('english').value,clarifications});result=checked.result;signals=checked.signals;renderFacts();$('clarification-source').hidden=!originalAnswers;$('original-answers').textContent='Original answers ('+$('language').value+')\n'+originalAnswers;$('translated-answers').textContent='Clarification source (sample: operator text; live: English)\n'+clarifications;$('clarification-panel').hidden=true;move('awaiting_review');status('Ready for human review. Unanswered details remain unknown.');});
-$('reviewed').onchange=()=>{clearApprovalOnly();if($('reviewed').checked&&canApprove({state:flow.state,reviewer:$('reviewer').value,critical:$('critical-reviewed').checked})){move('approved');assistedMs=performance.now()-(startedAt||performance.now());$('assisted-time').textContent=`Assisted intake: ${(assistedMs/1000).toFixed(1)} seconds (self-timed)`;}else if($('reviewed').checked){$('reviewed').checked=false;status('Complete extraction, clarification, reviewer reference and critical-detail checks before approval.');}else if(['approved','exported'].includes(flow.state)){flow.state='awaiting_review';renderState();}};
-function clearApprovalOnly(){$('summary-box').hidden=true;$('summary').textContent='';}
-$('generate').onclick=()=>{try{if(!$('reviewer').value.trim()||!$('critical-reviewed').checked)throw Error('Add a reviewer reference and check critical details first.');$('summary').textContent=handoff({reference:$('patient').value,language:$('language').selectedOptions[0].textContent,original:$('transcript').value,english:$('english').value,clarifications,result,corrections,valueCorrections,translationConfirmation,reviewed:$('reviewed').checked,state:flow.state,mode:mode==='sample'?'PREWRITTEN FICTIONAL SAMPLE':mode==='manual-review'?'MANUAL OPERATOR REVIEW - NO AI EXTRACTION':'SARVAM + OPERATOR REVIEW'});const acceptance={reviewer:$('reviewer').value.trim(),role:$('reviewer-role').value,selfAttested:true,acceptedAt:new Date().toISOString(),clinicianValidationStudy:false};$('summary').textContent+='\n\nREVIEW ACCEPTANCE (self-attested)\n'+acceptance.reviewer+' · '+acceptance.role+' · '+acceptance.acceptedAt+'\n\nORIGINAL CLARIFICATION ANSWERS\n'+(originalAnswers||'Not provided')+'\n\nREVIEW FLAGS\n'+(signals.map(s=>s.text+' “'+s.quote+'”').join('\n')||'No automatic flags; human review still required.');reviewPacket={kind:'patient-reported intake review — not an EHR record',schema:VERSION,patientReference:$('patient').value,language:$('language').value,original:$('transcript').value,english:$('english').value,clarifications,originalAnswers,facts:result.facts,ambiguities:result.ambiguities,signals,corrections,valueCorrections,translationConfirmation,acceptance,timing:timingObservation({manualMs,assistedMs,manualCaseId,caseId:loaded?.id||'operator-entered',corrections:Object.values(corrections).filter(Boolean).length})};$('acceptance').textContent='Accepted for this visit · '+acceptance.role+' · '+acceptance.reviewer;$('summary-box').hidden=false;status('Reviewed handoff ready.');}catch(e){status(e.message);}};
-function exported(){if(!$('summary').textContent||!$('reviewed').checked||!['approved','exported'].includes(flow.state))throw Error('Create a reviewed handoff first.');if(flow.state==='approved')move('exported');}
-$('download').onclick=()=>{try{exported();const url=URL.createObjectURL(new Blob([$('summary').textContent],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='patient-handoff.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){status(e.message);}};
-$('copy').onclick=async()=>{try{exported();await navigator.clipboard.writeText($('summary').textContent);status('Handoff copied.');}catch{status('Copy unavailable. Download the reviewed summary instead.');}};
-$('print').onclick=()=>{try{exported();window.print();}catch(e){status(e.message);}};
-$('cancel').onclick=()=>{controller?.abort();if(recording)recording.stop();requestSerial++;clearApproval();if(!['cancelled','failed'].includes(flow.state))move('cancelled');status('Cancelled. Start extraction again to continue.');};
-async function speakText(text,onPlayed){return task(async(signal,check)=>{requireConsent();if(!text.trim())throw Error('Add patient text first.');cleanAudio();status(t('speaking'));const data=await api('speak',{text,language:$('language').value},signal);check();audioUrl=URL.createObjectURL(new Blob([Uint8Array.from(atob(data.audios[0]),c=>c.charCodeAt(0))],{type:'audio/wav'}));$('audio').src=audioUrl;$('audio').hidden=false;try{await $('audio').play();onPlayed?.();}catch{status('Audio ready. Press play.');}});}
-async function startCapture(target=null,button=$('record')){
- if(recording){recording.stop();return;}if(busy)return;
- try{requireConsent();if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw Error('Recording unavailable. Type the patient’s words.');const revision=requestSerial;const acquired=await navigator.mediaDevices.getUserMedia({audio:true});if(revision!==requestSerial||!$('consent').checked){acquired.getTracks().forEach(t=>t.stop());return;}stream=acquired;observeStart();if(!target){resetDerived();move('consented');}const chunks=[];const type=['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported(t));const recorder=new MediaRecorder(stream,type?{mimeType:type}:undefined);recording=recorder;const language=$('language').value;setBusy(true);button.disabled=false;$('consent').disabled=false;button.textContent=t('stop');document.querySelector('.voice-box').classList.add('recording');
- recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};let seconds=0;timer=setInterval(()=>{$('voice-title').textContent=`${t('listening')} · ${++seconds}/25`;if(seconds>=25&&recorder.state==='recording')recorder.stop();},1000);
- recorder.onstop=()=>{clearInterval(timer);acquired.getTracks().forEach(t=>t.stop());stream=null;recording=null;setBusy(false);button.textContent=t(target?'answer':'record');$('voice-title').textContent=t('voice');document.querySelector('.voice-box').classList.remove('recording');if(flow.state==='cancelled'||!$('consent').checked)return status('Recording discarded.');task(async(signal,check)=>{const form=new FormData();const extension=recorder.mimeType.includes('mp4')?'m4a':recorder.mimeType.includes('ogg')?'ogg':'webm';form.append('file',new Blob(chunks,{type:recorder.mimeType}),'recording.'+extension);form.append('language',language);status(t('processing'));const data=await api('transcribe',form,signal);check();if(!data.transcript?.trim())throw Error('No speech detected. Try again or type.');if(target){target.value=data.transcript;status(t('recorded'));}else{$('transcript').value=data.transcript;$('english').value='';mode='live';loaded=null;move('transcribed');$('source').textContent='Sarvam transcript';status(t('recorded'));}});};recorder.start();
- }catch(e){stream?.getTracks().forEach(t=>t.stop());recording=null;setBusy(false);status(e.message);}
-}
-$('record').onclick=()=>startCapture();$('readback').onclick=()=>speakText($('transcript').value);
-$('live-case').onclick=()=>{if(!$('transcript').value.trim())return status('Load a case or enter patient words first.');resetDerived();mode='live';observeStart();if($('english').value.trim())translatedState();$('source').textContent='Live AI · synthetic case';status(t('liveSelected'));};
-['reviewer','reviewer-role'].forEach(id=>$(id).addEventListener('change',invalidateReviewer));$('reviewer').addEventListener('input',invalidateReviewer);$('critical-reviewed').addEventListener('change',()=>{const checked=$('critical-reviewed').checked;invalidateReviewer();$('critical-reviewed').checked=checked;});
-$('json-export').onclick=()=>{try{exported();downloadObject(reviewPacket,'patient-review.json');}catch(e){status(e.message);}};
-$('manual-start').onclick=()=>{manualStarted=performance.now();manualMs=null;manualCaseId=$('case').value||'operator-entered';$('manual-time').textContent='Manual timer running. Use the same fictional case.';};
-$('manual-stop').onclick=()=>{if(manualStarted===null)return;manualMs=performance.now()-manualStarted;manualStarted=null;$('manual-time').textContent=`Manual intake: ${(manualMs/1000).toFixed(1)} seconds (self-timed)`;};
-$('timing-export').onclick=()=>downloadObject(timingObservation({manualMs,assistedMs,manualCaseId,caseId:loaded?.id||'operator-entered',corrections:Object.values(corrections).filter(Boolean).length}),'timing-observation.json');
-$('clear').onclick=()=>{resetDerived();loaded=null;mode='manual';$('transcript').value='';$('english').value='';$('patient').value='Demo patient 001';$('reviewer').value='';$('critical-reviewed').checked=false;startedAt=null;assistedMs=null;$('consent').checked=false;$('access').value='';$('source').textContent='No case loaded';status('Session cleared.');};
-window.addEventListener('pagehide',()=>{controller?.abort();clearInterval(timer);stream?.getTracks().forEach(t=>t.stop());cleanAudio();$('access').value='';});
-populateCases();applyLocale($('language').value);renderState();
-fetch('/api/status').then(r=>r.json()).then(data=>{ready=data.ready;$('connection').textContent=ready?'● Sarvam · access required':'○ Synthetic demo · key needed';}).catch(()=>{$('connection').textContent='○ Server unavailable';});
-
-$('back-translate').onclick=()=>task(async(signal,check)=>{
- if(flow.state!=='translated')throw Error('Prepare an English translation first.');
- const english=$('english').value.trim();if(!english)throw Error('Add English text first.');
- if(mode==='sample'&&loaded){backTranslation=loaded.original;$('back-words').textContent='Prewritten sample back-translation: '+backTranslation;}
- else if($('language').value==='en-IN'){backTranslation=english;$('back-words').textContent=backTranslation;}
- else{requireConsent();const data=await api('translate',{text:english,language:$('language').value,direction:'back'},signal);check();backTranslation=data.translated_text;$('back-words').textContent=backTranslation;}
- backRead=false;$('translation-agreed').checked=false;$('translation-flags').textContent=translationSignals($('transcript').value,$('english').value).map(s=>s.text).join(' ');
+import { createRecording } from "./modules/recording.js";
+import { renderFactCards, renderQuestions } from "./modules/review.js";
+import {
+  downloadObject,
+  downloadText,
+  prepareReviewExport,
+  assertExportable,
+} from "./modules/export.js";
+import {
+  translationSignals,
+  confirmationMatches,
+} from "./translation-checks.js";
+import { tr, applyLocale } from "./modules/i18n.js";
+import {
+  applyReviewRules,
+  timingObservation,
+  canApprove,
+} from "./review-tools.js";
+import {
+  VERSION,
+  Workflow,
+  validateExtraction,
+  retainAnswers,
+} from "./agent.js";
+import { CASES } from "./sample-cases.js";
+const $ = (id) => document.getElementById(id);
+const flow = new Workflow();
+let ready = false,
+  mode = "manual",
+  loaded = null,
+  result = null,
+  clarifications = "",
+  corrections = {},
+  valueCorrections = {},
+  busy = false,
+  controller = null,
+  requestSerial = 0;
+let backTranslation = "",
+  backRead = false,
+  translationConfirmation = null;
+let startedAt = null,
+  assistedMs = null,
+  manualStarted = null,
+  manualMs = null,
+  manualCaseId = null,
+  originalAnswers = "",
+  signals = [],
+  reviewPacket = null;
+const capture = createRecording({
+  $,
+  t: (key) => t(key),
+  flow,
+  isBusy: () => busy,
+  getRevision: () => requestSerial,
+  requireConsent,
+  observeStart,
+  resetDerived,
+  move,
+  setBusy,
+  status: (message) => status(message),
+  task,
+  api,
+  onTranscript(text) {
+    $("transcript").value = text;
+    $("english").value = "";
+    mode = "live";
+    loaded = null;
+    move("transcribed");
+    $("source").textContent = "Sarvam transcript";
+    status(t("recorded"));
+  },
 });
-$('back-listen').onclick=()=>{if(!backTranslation)return status('Prepare the back-translation first.');if(mode==='sample'){backRead=true;return status('Prewritten sample: intake worker, read the displayed back-translation aloud before confirmation. No speech API call.');}speakText(backTranslation,()=>{backRead=true;});};
-$('confirm-translation').onclick=()=>{try{
- if(!backRead||!$('translation-agreed').checked)throw Error('Read the back-translation aloud and record patient confirmation first.');
- translationConfirmation={original:$('transcript').value,english:$('english').value,backTranslation,readAloud:true,confirmed:true,confirmedAt:new Date().toISOString(),method:mode==='sample'?'prewritten sample, operator-read self-attestation':'readback self-attestation'};
- flow.confirmTranslation(translationConfirmation);renderState();status('Translation confirmed. Extract reported facts next.');
- }catch(e){status(e.message);}};
-$('translation-agreed').onchange=()=>{if(!$('translation-agreed').checked&&translationConfirmation){resetDerived();translatedState();status('Confirmation revoked. Prepare and confirm again.');}};
-$('manual-review').onclick=async()=>{if(!confirmationMatches(translationConfirmation,$('transcript').value,$('english').value))return status('Confirm the translation first.');if(flow.state!=='translation_confirmed'){translatedState();flow.confirmTranslation(translationConfirmation);renderState();}clearApproval();mode='manual-review';result={facts:[],ambiguities:[]};await extractionReady({result});if(flow.state==='clarifying')move('awaiting_review');$('clarification-panel').hidden=true;$('source').textContent='Manual review - no AI extraction';status('Original words retained. Enter operator corrections in the fields and review; unfilled details remain unknown.');};
+const { startCapture, speakText } = capture;
+const t = (key) => tr($("language").value, key);
+const localizedStatus = {
+  "Fictional case loaded. Translation and extraction are prewritten; no API calls.":
+    "sampleLoaded",
+  "Facts ready. Verify the full quotes and their categories.": "factsReady",
+  "Ready for human review. Unanswered details remain unknown.": "reviewReady",
+  "Session cleared.": "cleared",
+  "Transcript ready. Review and translate.": "recorded",
+  "Translation ready. Check numbers, negations, and names.": "translated",
+  "Translating with Sarvam…": "translating",
+  "Extracting evidence with Sarvam…": "extracting",
+  "Checking clarification evidence…": "saving",
+};
+const status = (message) => {
+  $("status").textContent = localizedStatus[message]
+    ? t(localizedStatus[message])
+    : message;
+};
+function observeStart() {
+  if (startedAt === null) {
+    startedAt = performance.now();
+    assistedMs = null;
+  }
+}
+function invalidateReviewer() {
+  clearApproval();
+  if (["approved", "exported"].includes(flow.state)) {
+    flow.state = "awaiting_review";
+    renderState();
+  }
+}
+const renderState = () => {
+  $("workflow").textContent = flow.state;
+};
+function move(state) {
+  flow.move(state);
+  renderState();
+}
+function cleanAudio() {
+  capture.cleanAudio();
+}
+function clearApproval() {
+  $("critical-reviewed").checked = false;
+  $("reviewed").checked = false;
+  $("summary-box").hidden = true;
+  $("summary").textContent = "";
+  reviewPacket = null;
+}
+function resetDerived() {
+  backTranslation = "";
+  backRead = false;
+  translationConfirmation = null;
+  $("back-words").textContent = "";
+  $("translation-agreed").checked = false;
+  $("translation-flags").textContent = "";
+  controller?.abort();
+  requestSerial++;
+  flow.reset();
+  renderState();
+  result = null;
+  clarifications = "";
+  corrections = {};
+  valueCorrections = {};
+  signals = [];
+  originalAnswers = "";
+  $("overview").hidden = true;
+  $("clarification-source").hidden = true;
+  $("facts").replaceChildren();
+  $("questions").replaceChildren();
+  $("clarification-panel").hidden = true;
+  $("agent-meta").textContent = "";
+  clearApproval();
+  cleanAudio();
+}
+function translatedState() {
+  flow.reset();
+  move("consented");
+  move("transcribed");
+  move("translated");
+}
+function populateCases() {
+  const options = CASES.filter((c) => c.language === $("language").value);
+  $("sample").disabled = !options.length;
+  $("case").disabled = !options.length;
+  $("case").replaceChildren(
+    ...options.map((c) => new Option(c.id.split("-").slice(2).join("-"), c.id)),
+  );
+}
+function requireConsent() {
+  if (!$("consent").checked) throw Error(t("noConsent"));
+  if (!ready)
+    throw Error("Live Sarvam is not configured. Try a fictional sample case.");
+  if (!$("access").value)
+    throw Error("Enter the deployment owner’s live access token.");
+}
+async function api(path, body, signal) {
+  const isForm = body instanceof FormData;
+  const r = await fetch("/api/" + path, {
+    method: "POST",
+    headers: {
+      ...(isForm ? {} : { "Content-Type": "application/json" }),
+      "X-Patient-Consent": "yes",
+      Authorization: "Bearer " + $("access").value,
+    },
+    body: isForm ? body : JSON.stringify(body),
+    signal,
+  });
+  const data = await r.json();
+  if (!r.ok) throw Error(data.error || "Processing failed.");
+  return data;
+}
+function setBusy(value) {
+  busy = value;
+  document
+    .querySelectorAll("button")
+    .forEach(
+      (b) =>
+        (b.disabled =
+          (value && b.id !== "cancel") || b.dataset.unavailable === "true"),
+    );
+  document
+    .querySelectorAll("input,textarea,select")
+    .forEach((e) => (e.disabled = value));
+}
+async function task(fn) {
+  if (busy || capture.active) return;
+  controller = new AbortController();
+  const signal = controller.signal;
+  const serial = ++requestSerial;
+  setBusy(true);
+  try {
+    await fn(signal, () => {
+      if (signal.aborted || serial !== requestSerial)
+        throw new DOMException("Cancelled", "AbortError");
+    });
+  } catch (e) {
+    if (e.name === "AbortError") {
+      status("Processing cancelled. Retry explicitly when ready.");
+    } else {
+      clearApproval();
+      if (
+        ["translated", "translation_confirmed", "clarifying"].includes(
+          flow.state,
+        )
+      )
+        move("failed");
+      status(e.message);
+    }
+  } finally {
+    controller = null;
+    setBusy(false);
+  }
+}
+function loadSample() {
+  resetDerived();
+  loaded = CASES.find((c) => c.id === $("case").value);
+  if (!loaded)
+    return status(
+      "Fictional samples are available in English, Hindi, Tamil, Telugu, and Kannada.",
+    );
+  mode = "sample";
+  startedAt = performance.now();
+  assistedMs = null;
+  $("transcript").value = loaded.original;
+  $("english").value = loaded.english;
+  translatedState();
+  $("source").textContent = "Prewritten sample";
+  status(
+    "Fictional case loaded. Translation and extraction are prewritten; no API calls.",
+  );
+}
+function edited(original = false) {
+  observeStart();
+  resetDerived();
+  loaded = null;
+  mode = "manual";
+  $("source").textContent = "Operator edited";
+  if (original) $("english").value = "";
+  if ($("english").value.trim()) translatedState();
+  else {
+    move("consented");
+    move("transcribed");
+  }
+  status("Text changed. Extract again and review before export.");
+}
+function renderFacts() {
+  return renderFactCards({
+    $,
+    t,
+    result,
+    corrections,
+    valueCorrections,
+    signals,
+    mode,
+    clarifications,
+    invalidateReviewer,
+  });
+}
+async function extractionReady(data, signal, check = () => {}) {
+  result = data.result;
+  const errors = validateExtraction(result, {
+    original: $("transcript").value,
+    english: $("english").value,
+    clarifications,
+  });
+  if (errors.length) throw Error("Invalid evidence. Review text and retry.");
+  const checked = applyReviewRules(result, {
+    original: $("transcript").value,
+    english: $("english").value,
+    clarifications,
+  });
+  result = checked.result;
+  signals = [
+    ...checked.signals,
+    ...translationSignals($("transcript").value, $("english").value),
+    ...(data.valueFlags || []),
+    ...(data.questionFlags || []),
+  ];
+  move("extracted");
+  const pending = renderFacts();
+  $("agent-meta").textContent = data.meta
+    ? `${data.meta.mode} · ${data.meta.calls} calls · ${data.meta.latencyMs} ms · prompt ${VERSION}`
+    : mode === "manual-review"
+      ? "Manual operator review · no model calls"
+      : "Prewritten sample extraction · no model calls";
+  await renderQuestions({
+    $,
+    t,
+    questions: pending.questions,
+    requireConsent,
+    api,
+    signal,
+    check,
+    speakText,
+    startCapture,
+  });
+  if (pending.questions.length) {
+    move("clarifying");
+    $("clarification-panel").hidden = false;
+  } else move("awaiting_review");
+  status("Facts ready. Verify the full quotes and their categories.");
+}
+$("sample").onclick = loadSample;
+$("case").onchange = () => {
+  resetDerived();
+  $("transcript").value = "";
+  $("english").value = "";
+  loaded = null;
+  mode = "manual";
+  status("Choose Try a sample case to load the selected fictional case.");
+};
+$("language").onchange = () => {
+  resetDerived();
+  populateCases();
+  applyLocale($("language").value);
+  startedAt = null;
+  assistedMs = null;
+  $("transcript").value = "";
+  $("english").value = "";
+  loaded = null;
+  mode = "manual";
+  $("source").textContent = "No case loaded";
+  status("Language changed. Record, type, or load a sample.");
+};
+$("transcript").oninput = () => edited(true);
+$("english").oninput = () => edited(false);
+$("patient").oninput = () => {
+  clearApproval();
+  if (["approved", "exported"].includes(flow.state)) {
+    flow.state = "awaiting_review";
+    renderState();
+  }
+};
+$("consent").onchange = () => {
+  if (!$("consent").checked) {
+    controller?.abort();
+    capture.stop();
+    clearApproval();
+  }
+};
+$("translate").onclick = () =>
+  task(async (signal, check) => {
+    const text = $("transcript").value.trim();
+    if (!text) throw Error("Enter patient words first.");
+    if ($("language").value === "en-IN") {
+      resetDerived();
+      $("english").value = text;
+      mode = "manual";
+      translatedState();
+      return status("English source copied. Review before extraction.");
+    }
+    requireConsent();
+    clearApproval();
+    status("Translating with Sarvam…");
+    const data = await api(
+      "translate",
+      { text, language: $("language").value },
+      signal,
+    );
+    check();
+    resetDerived();
+    $("english").value = data.translated_text;
+    mode = "live";
+    loaded = null;
+    translatedState();
+    $("source").textContent = "Sarvam translation";
+    status("Translation ready. Check numbers, negations, and names.");
+  });
+$("extract").onclick = () =>
+  task(async (signal, check) => {
+    if (!$("english").value.trim() || !$("transcript").value.trim())
+      throw Error("Review original words and English text first.");
+    clearApproval();
+    clarifications = "";
+    corrections = {};
+    valueCorrections = {};
+    if (
+      !confirmationMatches(
+        translationConfirmation,
+        $("transcript").value,
+        $("english").value,
+      ) ||
+      flow.state !== "translation_confirmed"
+    )
+      throw Error("Read back and confirm the translation before extraction.");
+    if (mode === "sample" && loaded) {
+      await extractionReady(
+        { result: structuredClone(loaded.expected) },
+        signal,
+        check,
+      );
+      return;
+    }
+    requireConsent();
+    status("Extracting evidence with Sarvam…");
+    const data = await api(
+      "extract",
+      {
+        original: $("transcript").value,
+        text: $("english").value,
+        stage: flow.state,
+        translationConfirmed: true,
+      },
+      signal,
+    );
+    check();
+    await extractionReady(data, signal, check);
+  });
+$("clarify").onclick = () =>
+  task(async (signal, check) => {
+    if (flow.state !== "clarifying") throw Error("Extract facts first.");
+    const answers = [...$("questions").querySelectorAll("textarea")]
+      .map((el) => ({ field: el.dataset.field, text: el.value.trim() }))
+      .filter((x) => x.text);
+    originalAnswers = answers.map((a) => `${a.field}: ${a.text}`).join("\n");
+    if (
+      answers.length &&
+      mode !== "sample" &&
+      $("language").value !== "en-IN"
+    ) {
+      requireConsent();
+      for (const answer of answers) {
+        const translated = await api(
+          "translate",
+          { text: answer.text, language: $("language").value },
+          signal,
+        );
+        check();
+        answer.text = translated.translated_text;
+      }
+    }
+    clarifications = answers.map((a) => `${a.field}: ${a.text}`).join("\n");
+    if (answers.length && mode !== "sample") {
+      requireConsent();
+      status("Checking clarification evidence…");
+      const data = await api(
+        "extract",
+        {
+          original: $("transcript").value,
+          text: $("english").value,
+          clarifications,
+          stage: "clarifying",
+          translationConfirmed: Boolean(translationConfirmation?.confirmed),
+        },
+        signal,
+      );
+      check();
+      if (
+        validateExtraction(data.result, {
+          original: $("transcript").value,
+          english: $("english").value,
+          clarifications,
+        }).length
+      )
+        throw Error("Clarification evidence is invalid.");
+      result = data.result;
+      $("agent-meta").textContent =
+        `${data.meta.mode} · clarification pass · ${data.meta.calls} calls`;
+    } else if (answers.length) {
+      status(
+        "Sample answers recorded verbatim under operator-selected fields. No AI call.",
+      );
+    }
+    result = retainAnswers(result, answers);
+    if (
+      validateExtraction(result, {
+        original: $("transcript").value,
+        english: $("english").value,
+        clarifications,
+      }).length
+    )
+      throw Error(
+        "Clarification evidence is invalid. Review and extract again.",
+      );
+    const checked = applyReviewRules(result, {
+      original: $("transcript").value,
+      english: $("english").value,
+      clarifications,
+    });
+    result = checked.result;
+    signals = checked.signals;
+    renderFacts();
+    $("clarification-source").hidden = !originalAnswers;
+    $("original-answers").textContent =
+      "Original answers (" + $("language").value + ")\n" + originalAnswers;
+    $("translated-answers").textContent =
+      "Clarification source (sample: operator text; live: English)\n" +
+      clarifications;
+    $("clarification-panel").hidden = true;
+    move("awaiting_review");
+    status("Ready for human review. Unanswered details remain unknown.");
+  });
+$("reviewed").onchange = () => {
+  clearApprovalOnly();
+  if (
+    $("reviewed").checked &&
+    canApprove({
+      state: flow.state,
+      reviewer: $("reviewer").value,
+      critical: $("critical-reviewed").checked,
+    })
+  ) {
+    move("approved");
+    assistedMs = performance.now() - (startedAt || performance.now());
+    $("assisted-time").textContent =
+      `Assisted intake: ${(assistedMs / 1000).toFixed(1)} seconds (self-timed)`;
+  } else if ($("reviewed").checked) {
+    $("reviewed").checked = false;
+    status(
+      "Complete extraction, clarification, reviewer reference and critical-detail checks before approval.",
+    );
+  } else if (["approved", "exported"].includes(flow.state)) {
+    flow.state = "awaiting_review";
+    renderState();
+  }
+};
+function clearApprovalOnly() {
+  $("summary-box").hidden = true;
+  $("summary").textContent = "";
+}
+$("generate").onclick = () => {
+  try {
+    if (!$("reviewer").value.trim() || !$("critical-reviewed").checked)
+      throw Error("Add a reviewer reference and check critical details first.");
+    const prepared = prepareReviewExport({
+      reference: $("patient").value,
+      language: $("language").selectedOptions[0].textContent,
+      original: $("transcript").value,
+      english: $("english").value,
+      clarifications,
+      result,
+      corrections,
+      valueCorrections,
+      translationConfirmation,
+      reviewed: $("reviewed").checked,
+      state: flow.state,
+      mode:
+        mode === "sample"
+          ? "PREWRITTEN FICTIONAL SAMPLE"
+          : mode === "manual-review"
+            ? "MANUAL OPERATOR REVIEW - NO AI EXTRACTION"
+            : "SARVAM + OPERATOR REVIEW",
+      reviewer: $("reviewer").value,
+      role: $("reviewer-role").value,
+      originalAnswers,
+      signals,
+      languageCode: $("language").value,
+      timing: {
+        manualMs,
+        assistedMs,
+        manualCaseId,
+        caseId: loaded?.id || "operator-entered",
+        corrections: Object.values(corrections).filter(Boolean).length,
+      },
+    });
+    $("summary").textContent = prepared.text;
+    reviewPacket = prepared.packet;
+    const acceptance = prepared.acceptance;
+    $("acceptance").textContent =
+      "Accepted for this visit · " +
+      acceptance.role +
+      " · " +
+      acceptance.reviewer;
+    $("summary-box").hidden = false;
+    status("Reviewed handoff ready.");
+  } catch (e) {
+    status(e.message);
+  }
+};
+function exported() {
+  assertExportable({
+    text: $("summary").textContent,
+    reviewed: $("reviewed").checked,
+    state: flow.state,
+  });
+  if (flow.state === "approved") move("exported");
+}
+$("download").onclick = () => {
+  try {
+    exported();
+    downloadText($("summary").textContent, "patient-handoff.txt");
+  } catch (e) {
+    status(e.message);
+  }
+};
+$("copy").onclick = async () => {
+  try {
+    exported();
+    await navigator.clipboard.writeText($("summary").textContent);
+    status("Handoff copied.");
+  } catch {
+    status("Copy unavailable. Download the reviewed summary instead.");
+  }
+};
+$("print").onclick = () => {
+  try {
+    exported();
+    window.print();
+  } catch (e) {
+    status(e.message);
+  }
+};
+$("cancel").onclick = () => {
+  controller?.abort();
+  capture.stop();
+  requestSerial++;
+  clearApproval();
+  if (!["cancelled", "failed"].includes(flow.state)) move("cancelled");
+  status("Cancelled. Start extraction again to continue.");
+};
+$("record").onclick = () => startCapture();
+$("readback").onclick = () => speakText($("transcript").value);
+$("live-case").onclick = () => {
+  if (!$("transcript").value.trim())
+    return status("Load a case or enter patient words first.");
+  resetDerived();
+  mode = "live";
+  observeStart();
+  if ($("english").value.trim()) translatedState();
+  $("source").textContent = "Live AI · synthetic case";
+  status(t("liveSelected"));
+};
+["reviewer", "reviewer-role"].forEach((id) =>
+  $(id).addEventListener("change", invalidateReviewer),
+);
+$("reviewer").addEventListener("input", invalidateReviewer);
+$("critical-reviewed").addEventListener("change", () => {
+  const checked = $("critical-reviewed").checked;
+  invalidateReviewer();
+  $("critical-reviewed").checked = checked;
+});
+$("json-export").onclick = () => {
+  try {
+    exported();
+    downloadObject(reviewPacket, "patient-review.json");
+  } catch (e) {
+    status(e.message);
+  }
+};
+$("manual-start").onclick = () => {
+  manualStarted = performance.now();
+  manualMs = null;
+  manualCaseId = $("case").value || "operator-entered";
+  $("manual-time").textContent =
+    "Manual timer running. Use the same fictional case.";
+};
+$("manual-stop").onclick = () => {
+  if (manualStarted === null) return;
+  manualMs = performance.now() - manualStarted;
+  manualStarted = null;
+  $("manual-time").textContent =
+    `Manual intake: ${(manualMs / 1000).toFixed(1)} seconds (self-timed)`;
+};
+$("timing-export").onclick = () =>
+  downloadObject(
+    timingObservation({
+      manualMs,
+      assistedMs,
+      manualCaseId,
+      caseId: loaded?.id || "operator-entered",
+      corrections: Object.values(corrections).filter(Boolean).length,
+    }),
+    "timing-observation.json",
+  );
+$("clear").onclick = () => {
+  resetDerived();
+  loaded = null;
+  mode = "manual";
+  $("transcript").value = "";
+  $("english").value = "";
+  $("patient").value = "Demo patient 001";
+  $("reviewer").value = "";
+  $("critical-reviewed").checked = false;
+  startedAt = null;
+  assistedMs = null;
+  $("consent").checked = false;
+  $("access").value = "";
+  $("source").textContent = "No case loaded";
+  status("Session cleared.");
+};
+window.addEventListener("pagehide", () => {
+  controller?.abort();
+  capture.dispose();
+  $("access").value = "";
+});
+populateCases();
+applyLocale($("language").value);
+renderState();
+fetch("/api/status")
+  .then((r) => r.json())
+  .then((data) => {
+    ready = data.ready;
+    $("connection").textContent = ready
+      ? "● Sarvam · access required"
+      : "○ Synthetic demo · key needed";
+  })
+  .catch(() => {
+    $("connection").textContent = "○ Server unavailable";
+  });
+
+$("back-translate").onclick = () =>
+  task(async (signal, check) => {
+    if (flow.state !== "translated")
+      throw Error("Prepare an English translation first.");
+    const english = $("english").value.trim();
+    if (!english) throw Error("Add English text first.");
+    if (mode === "sample" && loaded) {
+      backTranslation = loaded.original;
+      $("back-words").textContent =
+        "Prewritten sample back-translation: " + backTranslation;
+    } else if ($("language").value === "en-IN") {
+      backTranslation = english;
+      $("back-words").textContent = backTranslation;
+    } else {
+      requireConsent();
+      const data = await api(
+        "translate",
+        { text: english, language: $("language").value, direction: "back" },
+        signal,
+      );
+      check();
+      backTranslation = data.translated_text;
+      $("back-words").textContent = backTranslation;
+    }
+    backRead = false;
+    $("translation-agreed").checked = false;
+    $("translation-flags").textContent = translationSignals(
+      $("transcript").value,
+      $("english").value,
+    )
+      .map((s) => s.text)
+      .join(" ");
+  });
+$("back-listen").onclick = () => {
+  if (!backTranslation) return status("Prepare the back-translation first.");
+  if (mode === "sample") {
+    backRead = true;
+    return status(
+      "Prewritten sample: intake worker, read the displayed back-translation aloud before confirmation. No speech API call.",
+    );
+  }
+  speakText(backTranslation, () => {
+    backRead = true;
+  });
+};
+$("confirm-translation").onclick = () => {
+  try {
+    if (!backRead || !$("translation-agreed").checked)
+      throw Error(
+        "Read the back-translation aloud and record patient confirmation first.",
+      );
+    translationConfirmation = {
+      original: $("transcript").value,
+      english: $("english").value,
+      backTranslation,
+      readAloud: true,
+      confirmed: true,
+      confirmedAt: new Date().toISOString(),
+      method:
+        mode === "sample"
+          ? "prewritten sample, operator-read self-attestation"
+          : "readback self-attestation",
+    };
+    flow.confirmTranslation(translationConfirmation);
+    renderState();
+    status("Translation confirmed. Extract reported facts next.");
+  } catch (e) {
+    status(e.message);
+  }
+};
+$("translation-agreed").onchange = () => {
+  if (!$("translation-agreed").checked && translationConfirmation) {
+    resetDerived();
+    translatedState();
+    status("Confirmation revoked. Prepare and confirm again.");
+  }
+};
+$("manual-review").onclick = async () => {
+  if (
+    !confirmationMatches(
+      translationConfirmation,
+      $("transcript").value,
+      $("english").value,
+    )
+  )
+    return status("Confirm the translation first.");
+  if (flow.state !== "translation_confirmed") {
+    translatedState();
+    flow.confirmTranslation(translationConfirmation);
+    renderState();
+  }
+  clearApproval();
+  mode = "manual-review";
+  result = { facts: [], ambiguities: [] };
+  await extractionReady({ result });
+  if (flow.state === "clarifying") move("awaiting_review");
+  $("clarification-panel").hidden = true;
+  $("source").textContent = "Manual review - no AI extraction";
+  status(
+    "Original words retained. Enter operator corrections in the fields and review; unfilled details remain unknown.",
+  );
+};

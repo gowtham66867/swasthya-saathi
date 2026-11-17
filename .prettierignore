@@ -1,0 +1,7 @@
+# Generated bundles and historical/frozen evidence preserve their source bytes.
+dist/
+evals/results/
+evals/cases.v3.json
+evals/cases.v3.freeze.json
+evaluation.json
+.openai/

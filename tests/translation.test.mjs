@@ -1,11 +1,130 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {translationSignals,confirmationMatches} from '../translation-checks.js';
-import {Workflow} from '../agent.js';
-import {handleApi} from '../server.mjs';
-test('number, unit and negation mismatches flag without modifying text',()=>{const flags=translationSignals('मैं २.५ mg लेता हूँ, बुखार नहीं है।','I take 5 g. I have fever.');assert.deepEqual(flags.map(s=>s.kind),['translation-numbers','translation-units','translation-negation']);assert.deepEqual(translationSignals('मैं २.५ mg लेता हूँ।','I take 2.5 mg.'),[]);});
-test('confirmation state gates extraction and stale content invalidates record',()=>{const flow=new Workflow();for(const s of ['consented','transcribed','translated'])flow.move(s);assert.throws(()=>flow.move('extracted'));assert.throws(()=>flow.confirmTranslation({confirmed:true}));const record={confirmed:true,readAloud:true,original:'a',english:'b',backTranslation:'a',confirmedAt:'2026-11-17'};flow.confirmTranslation(record);assert.equal(flow.state,'translation_confirmed');assert.ok(confirmationMatches(flow.translationConfirmation,'a','b'));assert.equal(confirmationMatches(record,'edited','b'),false);flow.move('extracted');flow.reset();assert.equal(flow.translationConfirmation,null);});
-test('back-translation route reverses source and target',async()=>{const old=globalThis.fetch;globalThis.fetch=async(url,options)=>{const body=JSON.parse(options.body);assert.equal(body.source_language_code,'en-IN');assert.equal(body.target_language_code,'te-IN');return Response.json({translated_text:'కల్పిత సమాచారం'});};try{const req=new Request('https://a.test/api/translate',{method:'POST',headers:{origin:'https://a.test','X-Patient-Consent':'yes',Authorization:'Bearer '+'a'.repeat(32),'Content-Type':'application/json'},body:JSON.stringify({text:'Synthetic text',language:'te-IN',direction:'back'})});assert.equal((await handleApi(req,{SARVAM_API_KEY:'test',LIVE_ACCESS_TOKEN:'a'.repeat(32)})).status,200);}finally{globalThis.fetch=old;}});
-test('server rejects extraction without translation confirmation',async()=>{const req=new Request('https://a.test/api/extract',{method:'POST',headers:{origin:'https://a.test','X-Patient-Consent':'yes',Authorization:'Bearer '+'a'.repeat(32),'Content-Type':'application/json'},body:JSON.stringify({text:'Synthetic text',stage:'translation_confirmed'})});assert.equal((await handleApi(req,{SARVAM_API_KEY:'test',LIVE_ACCESS_TOKEN:'a'.repeat(32)})).status,409);});
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  translationSignals,
+  confirmationMatches,
+} from "../translation-checks.js";
+import { Workflow } from "../agent.js";
+import { handleApi } from "../server.mjs";
+test("number, unit and negation mismatches flag without modifying text", () => {
+  const flags = translationSignals(
+    "मैं २.५ mg लेता हूँ, बुखार नहीं है।",
+    "I take 5 g. I have fever.",
+  );
+  assert.deepEqual(
+    flags.map((s) => s.kind),
+    ["translation-numbers", "translation-units", "translation-negation"],
+  );
+  assert.deepEqual(
+    translationSignals("मैं २.५ mg लेता हूँ।", "I take 2.5 mg."),
+    [],
+  );
+});
+test("confirmation state gates extraction and stale content invalidates record", () => {
+  const flow = new Workflow();
+  for (const s of ["consented", "transcribed", "translated"]) flow.move(s);
+  assert.throws(() => flow.move("extracted"));
+  assert.throws(() => flow.confirmTranslation({ confirmed: true }));
+  const record = {
+    confirmed: true,
+    readAloud: true,
+    original: "a",
+    english: "b",
+    backTranslation: "a",
+    confirmedAt: "2026-11-17",
+  };
+  flow.confirmTranslation(record);
+  assert.equal(flow.state, "translation_confirmed");
+  assert.ok(confirmationMatches(flow.translationConfirmation, "a", "b"));
+  assert.equal(confirmationMatches(record, "edited", "b"), false);
+  flow.move("extracted");
+  flow.reset();
+  assert.equal(flow.translationConfirmation, null);
+});
+test("back-translation route reverses source and target", async () => {
+  const old = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    const body = JSON.parse(options.body);
+    assert.equal(body.source_language_code, "en-IN");
+    assert.equal(body.target_language_code, "te-IN");
+    return Response.json({ translated_text: "కల్పిత సమాచారం" });
+  };
+  try {
+    const req = new Request("https://a.test/api/translate", {
+      method: "POST",
+      headers: {
+        origin: "https://a.test",
+        "X-Patient-Consent": "yes",
+        Authorization: "Bearer " + "a".repeat(32),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: "Synthetic text",
+        language: "te-IN",
+        direction: "back",
+      }),
+    });
+    assert.equal(
+      (
+        await handleApi(req, {
+          SARVAM_API_KEY: "test",
+          LIVE_ACCESS_TOKEN: "a".repeat(32),
+        })
+      ).status,
+      200,
+    );
+  } finally {
+    globalThis.fetch = old;
+  }
+});
+test("server rejects extraction without translation confirmation", async () => {
+  const req = new Request("https://a.test/api/extract", {
+    method: "POST",
+    headers: {
+      origin: "https://a.test",
+      "X-Patient-Consent": "yes",
+      Authorization: "Bearer " + "a".repeat(32),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text: "Synthetic text",
+      stage: "translation_confirmed",
+    }),
+  });
+  assert.equal(
+    (
+      await handleApi(req, {
+        SARVAM_API_KEY: "test",
+        LIVE_ACCESS_TOKEN: "a".repeat(32),
+      })
+    ).status,
+    409,
+  );
+});
 
-test('exports reject missing or stale translation confirmation',async()=>{const {handoff}=await import('../agent.js');const base={original:'a',english:'a',result:{facts:[],ambiguities:[]},state:'approved',reviewed:true};assert.throws(()=>handoff(base),/confirmation/);assert.throws(()=>handoff({...base,translationConfirmation:{confirmed:true,readAloud:true,original:'changed',english:'a',backTranslation:'a',confirmedAt:'test'}}),/confirmation/);});
+test("exports reject missing or stale translation confirmation", async () => {
+  const { handoff } = await import("../agent.js");
+  const base = {
+    original: "a",
+    english: "a",
+    result: { facts: [], ambiguities: [] },
+    state: "approved",
+    reviewed: true,
+  };
+  assert.throws(() => handoff(base), /confirmation/);
+  assert.throws(
+    () =>
+      handoff({
+        ...base,
+        translationConfirmation: {
+          confirmed: true,
+          readAloud: true,
+          original: "changed",
+          english: "a",
+          backTranslation: "a",
+          confirmedAt: "test",
+        },
+      }),
+    /confirmation/,
+  );
+});

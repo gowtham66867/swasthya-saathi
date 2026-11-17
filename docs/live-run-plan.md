@@ -27,12 +27,12 @@ The frozen holdout runner refuses to overwrite its first report, including a par
 
 [Official Sarvam pricing](https://docs.sarvam.ai/api/getting-started/pricing), checked 17 November 2026: sarvam-105b ₹10/million input and ₹25/million output tokens; STT ₹0.49/minute; Bulbul v3 ₹3/1,000 characters; translation ₹2/1,000 characters. GST and Cloud Run costs are excluded; actual billing, retries and rounding may differ.
 
-| Run | Expected planning range | Conservative model allowance |
-| --- | --- | --- |
-| Frozen v3, 16 cases | ₹0.5–₹2 | ₹14.16 assuming 3 calls/case, 24,000 input and 2,200 output tokens/call |
-| Seen-case regression, 30 cases | ₹1–₹4 | ₹26.55 under the same assumptions |
-| Four-language synthetic speech, 24 cases | ₹7–₹15 | Add up to ₹21.24 for extraction under the same assumptions; provider retries can add cost |
-| Human-recorded fictional audio | Cannot estimate a total until manifest/durations are supplied | Example six × 25-second clips, 200 transcription characters each: STT ≈₹1.23, translation ≈₹2.40, extraction ≈₹0.2–₹1 expected (up to ₹5.31 under conservative assumptions); no TTS charge |
+| Run                                      | Expected planning range                                       | Conservative model allowance                                                                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Frozen v3, 16 cases                      | ₹0.5–₹2                                                       | ₹14.16 assuming 3 calls/case, 24,000 input and 2,200 output tokens/call                                                                                                                    |
+| Seen-case regression, 30 cases           | ₹1–₹4                                                         | ₹26.55 under the same assumptions                                                                                                                                                          |
+| Four-language synthetic speech, 24 cases | ₹7–₹15                                                        | Add up to ₹21.24 for extraction under the same assumptions; provider retries can add cost                                                                                                  |
+| Human-recorded fictional audio           | Cannot estimate a total until manifest/durations are supplied | Example six × 25-second clips, 200 transcription characters each: STT ≈₹1.23, translation ≈₹2.40, extraction ≈₹0.2–₹1 expected (up to ₹5.31 under conservative assumptions); no TTS charge |
 
 These are planning estimates, not enforced rupee billing caps or account-balance measurements. For the first holdout, request approval for a ₹15 allowance and stop after the first provider/schema failure for inspection. Approve the other suites independently. Demo request caps in Phase 8 bound calls, not INR.
 
