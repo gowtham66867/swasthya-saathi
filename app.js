@@ -15,6 +15,7 @@ import {
   applyReviewRules,
   timingObservation,
   canApprove,
+  mergeReviewSignals,
 } from "./review-tools.js";
 import {
   VERSION,
@@ -452,6 +453,7 @@ $("clarify").onclick = () =>
           original: $("transcript").value,
           text: $("english").value,
           clarifications,
+          originalClarifications: originalAnswers,
           stage: "clarifying",
           translationConfirmed: Boolean(translationConfirmation?.confirmed),
         },
@@ -467,6 +469,11 @@ $("clarify").onclick = () =>
       )
         throw Error("Clarification evidence is invalid.");
       result = data.result;
+      signals = mergeReviewSignals(
+        signals,
+        data.valueFlags || [],
+        data.questionFlags || [],
+      );
       $("agent-meta").textContent =
         `${data.meta.mode} · clarification pass · ${data.meta.calls} calls`;
     } else if (answers.length) {
@@ -487,11 +494,16 @@ $("clarify").onclick = () =>
       );
     const checked = applyReviewRules(result, {
       original: $("transcript").value,
+      originalClarifications: originalAnswers,
       english: $("english").value,
       clarifications,
     });
     result = checked.result;
-    signals = checked.signals;
+    signals = mergeReviewSignals(
+      signals,
+      checked.signals,
+      translationSignals($("transcript").value, $("english").value),
+    );
     renderFacts();
     $("clarification-source").hidden = !originalAnswers;
     $("original-answers").textContent =

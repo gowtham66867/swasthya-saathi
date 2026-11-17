@@ -50,6 +50,8 @@ export function questionIssues(question, sources = {}) {
     )
   )
     return ["Question evidence invalid"];
+  if (instructionLike(question.quote))
+    return ["Instruction-like question evidence rejected"];
   const text = question.text;
   if (typeof text !== "string" || !text.trim() || text.length > 240)
     return ["Question length invalid"];

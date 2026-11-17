@@ -1,0 +1,157 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["facts", "ambiguities", "questions"],
+  "properties": {
+    "questions": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "quote", "sourceId", "text"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "concern",
+              "symptoms",
+              "duration",
+              "severity",
+              "medicines",
+              "allergies",
+              "history",
+              "questions"
+            ]
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "sourceId": {
+            "type": "string",
+            "enum": ["english", "clarifications"]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "facts": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "quote", "sourceId"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "concern",
+              "symptoms",
+              "duration",
+              "severity",
+              "medicines",
+              "allergies",
+              "history",
+              "questions"
+            ]
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "sourceId": {
+            "type": "string",
+            "enum": ["english", "clarifications"]
+          },
+          "value": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "dose": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "unit": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "frequency": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "negated": {
+                "type": "boolean"
+              },
+              "amount": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "onset": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "rating": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "scale": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "substance": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            }
+          }
+        }
+      }
+    },
+    "ambiguities": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["quote", "sourceId"],
+        "properties": {
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "sourceId": {
+            "type": "string",
+            "enum": ["english", "clarifications"]
+          }
+        }
+      }
+    }
+  }
+}

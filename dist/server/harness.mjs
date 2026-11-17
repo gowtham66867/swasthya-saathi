@@ -128,7 +128,9 @@ export async function runExtraction(
     const sanitized = sanitizeValues(anchored.result);
     const questioned = sanitizeQuestions(sanitized.result, sources);
     result = questioned.result;
-    const errors = validateExtraction(result, sources);
+    const errors = validateExtraction(result, sources, {
+      requireQuestions: true,
+    });
     if (!errors.length)
       return {
         result,

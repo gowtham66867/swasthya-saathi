@@ -1,109 +1,87 @@
 # Swasthya Saathi
 
-Multilingual patient intake with Sarvam voice, a bounded extraction harness, exact source evidence, clarification, and human-reviewed clinician handoff.
+Help patients explain their visit in their own language and give clinicians a handoff they can trace to the patient's words.
 
-- App: https://swasthya-saathi-935048564575.asia-south1.run.app
-- Source: https://github.com/gowtham66867/swasthya-saathi (private)
-- Architecture: [docs/architecture.md](docs/architecture.md)
-- Prompt: [prompts/intake-v2.mjs](prompts/intake-v2.mjs)
-- Schema: [prompts/intake-v1.schema.json](prompts/intake-v1.schema.json)
+For primary-care intake workers assisting patients in **Hindi, Tamil, Telugu, Kannada and English**. Sarvam handles voice, translation and bounded extraction; the worker and patient confirm the translation and a human reviewer accepts the handoff.
 
-## Run
+## Five-step demo
 
-Node 22 or later. No installation or external runtime packages required.
+1. Run `npm run build && npm run dev`, open `http://127.0.0.1:4317`, choose a language and load a fictional medication case. Samples are prewritten and free.
+2. Press **Prepare back-translation**, **Read back to patient**, read the displayed sample aloud, check the patient-confirmation box and **Confirm translation**.
+3. **Extract reported facts**, inspect the quoted evidence and proposed values, answer optional clarifications or leave unknown details blank, then continue to review.
+4. Enter a reviewer reference, choose **Hackathon demo reviewer**, check critical details and accept. Edit a fact to demonstrate that approval resets.
+5. Create the reviewed handoff and export text or JSON. Open [evaluation evidence](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html) and distinguish historical measured results from the new v3 implementation.
+
+The [two-minute walkthrough](demo.html) follows the same path. Live processing uses the same controls with consent and an owner or capped judge token. No credentials are included.
+
+## Three measured numbers
+
+| Historical live measurement                     | Result    |
+| ----------------------------------------------- | --------- |
+| Distinct fictional text cases completed         | **30/30** |
+| Exact fact recall on the frozen 20-case holdout | **93.0%** |
+| Exact fact precision on that holdout            | **86.8%** |
+
+These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3**; its paid evaluation and deployment await approval. The public Cloud Run deployment remains v2.2 until then.
+
+## Architecture
+
+```mermaid
+flowchart LR
+ A[Patient voice or text] --> B[Saaras ASR and editable original]
+ B --> C[English translation]
+ C --> D[Back-translation and readback]
+ D --> E[Patient confirmation]
+ E --> F[Bounded extraction and validation]
+ F --> G[Up to three targeted clarifications]
+ G --> H[Evidence, proposed values, review flags]
+ H --> I[Human approval and local export]
+```
+
+Application code owns the plan; model output never executes tools. The extraction model is `sarvam-105b`, with strict JSON output, 2,200 output tokens per call, one transient retry, one repair and an absolute **three-call ceiling** per extraction. One optional clarification pass permits at most six model calls across a visit. Questions are requested in the extraction response, not a separate model call. Translation/localized question/readback requests are separate, explicitly bounded UI operations with existing timeouts.
+
+Shared sentence segmentation protects decimals, abbreviations, danda and newlines. Facts retain whole-source quotations. Optional proposed values require exact quote tokens and remain beside their evidence; unsupported values are removed with a flag. Deterministic multilingual rules flag selected instructions, uncertainty, corrections and family context. Original words, clarification translations, human corrections and translation confirmation remain visible and export separately.
+
+Modules: browser orchestration in `app.js`; media/workflow/review/export/i18n in `modules/`; schema and provenance in `agent.js`; bounded provider orchestration in `harness.mjs`; protected routes in `server.mjs`; request budgets in `demo-access.mjs`. See [architecture](docs/architecture.md), [v3 prompt](prompts/intake-v3.mjs) and [v3 schema](prompts/intake-v3.schema.json).
+
+## Run and verify
+
+Node 22 or later; **zero runtime dependencies**.
 
 ```sh
 npm test
 npm run eval
 npm run build
 npm run dev
+# Optional pinned development formatter:
+npx --yes prettier@3.6.2 --check .
 ```
 
-Open http://127.0.0.1:4317. Select a language and fictional case, load it, extract the prewritten facts, optionally answer clarification questions, approve review, and export. English, Hindi, and Tamil have ten fictional cases each; Telugu and Kannada have six each. All five languages support patient instructions, typed intake, speech capture, question readback and clarification answers. All samples are explicitly prewritten; they are not model demonstrations.
+`npm run eval` is free: 30 historical fixture replays plus 16 hash-frozen v3 label/schema checks. The new holdout has not been run against a model or used for tuning. CI runs tests, offline evaluation and build. [Per-phase changes and checks](docs/implementation-phases.md) record each separate commit.
 
-## Live configuration
+For live processing, supply `SARVAM_API_KEY` and `LIVE_ACCESS_TOKEN` (32+ characters) through environment injection/Secret Manager. `SARVAM_TEXT_MODEL` optionally selects `sarvam-105b-conversations`. Speech uses `saaras:v3`, translation `sarvam-translate:v1` and playback `bulbul:v3`. Enter the app access token in the page's access section; it stays in memory. Local `.env` files are not automatically loaded.
 
-Live mode requires `SARVAM_API_KEY` and `LIVE_ACCESS_TOKEN` (at least 32 characters). Enter the owner's access token under **Live processing access**; it is held in the page only and cleared with the session. The Sarvam subscription key never enters browser code. Obtain credentials separately; none are included. Local `.env` files are not automatically loaded.
+The server enforces same-origin requests, explicit consent, access-token comparison, 5 MB bodies and provider timeouts. The HTTP adapter permits two active paid requests and 30 POSTs/minute per instance; production currently uses max one instance. Browser recording stops at 25 seconds. No database, application content logs or local storage hold patient data; exports leave the ephemeral session under operator control.
 
-Optional `SARVAM_TEXT_MODEL` is `sarvam-105b` (default) or `sarvam-105b-conversations`. Speech uses `saaras:v3`, translation `sarvam-translate:v1`, readback `bulbul:v3`. Extraction uses Sarvam's `/v1/chat/completions`, strict JSON-schema output, `reasoning_effort:low`, and a 2200-output-token limit per call. No additional AI provider is enabled.
+## Judge access
 
-Consent is required before any live request. Processing fails closed without both the provider key and access gate. Public demo visitors cannot invoke paid APIs unauthenticated. The shared access token is a prototype gate, not patient identity or clinical access management.
+A separate `DEMO_ACCESS_TOKEN` can enable an expiring, shared **request-capped** demo without sharing the owner token. All settings must be present: token, `DEMO_REQUEST_LIMIT`, absolute `DEMO_EXPIRES_AT`, and `DEMO_BUDGET_BUCKET`. Counter metadata is atomically updated in private Cloud Storage so restarts/concurrent instances do not reset the cap. Consent and all other gates still apply. Missing/unavailable budget storage denies requests.
 
-## Harness and review
+No demo secret, bucket or permissions were created. [Judge-access setup](docs/judge-access.md) describes the approval-dependent configuration. The bucket holds a hashed budget identifier and count only, never patient text/audio. Caps count authenticated POST attempts, including failed requests; an extraction attempt can contain up to three model calls.
 
-Application code owns the plan: transcribe → translate → extract → validate evidence → ask at most three clarifications → review → export. The model proposes extractive fact categories and ambiguity spans, never executable tools. Each extraction allows one transient retry and one repair, with an absolute three-call ceiling. There is one optional clarification extraction pass (at most six calls across the full interaction). Requests have timeouts, client cancellation, serialized UI operations, and stale-response checks.
+## Live evaluation and deployment approval
 
-Facts contain exact quotes and source IDs rather than generated value paraphrases. Validation rejects unknown categories, extra fields, fabricated spans, duplicate facts, and quotes that truncate a source sentence. Missing facts remain unknown; explicit denials retain their source sentence. Quote matching cannot establish correct clinical categorization or fully prove entailment. Human review is mandatory. Original and English text remain visible; there is no invented word alignment. Operator corrections remain labelled and retain extracted evidence. Editing text invalidates extraction and approval; correcting a field or reference resets approval.
+[The prepared live-run plan](docs/live-run-plan.md) includes commands, expected costs and recording-manifest instructions. No new paid evaluations were run during this implementation. The first v3 holdout is planned at roughly ₹0.5–₹2 with a conservative ₹15 allowance requested before execution; stop on its first failed case for review. Other suites require separate approval.
 
-Workflow state is ephemeral and owned by the page. The server gates extraction stages and validates every extraction response, but does not persist or cryptographically attest the clinical workflow. Download, copy, and print are local actions gated by review; this is not a signed clinical record.
+Human-recorded fictional audio can replace synthesized audio through `evals/audio-loader.mjs` and `evals/human-speech.mjs`; no recordings were fabricated. Use the ignored `evals/audio-private/` folder and supply actual reference transcripts plus speaker/upload consent.
 
-## Evaluations
+Deployment is a separate approval step after evaluated results are reviewed. Build first, preserve Secret Manager bindings, deploy the existing `swasthya-saathi` Cloud Run service in `asia-south1`, and smoke-test synthetic content. [Deployment/rollback details](docs/architecture.md#deployment-and-rollback) and [private GitHub source](https://github.com/gowtham66867/swasthya-saathi).
 
-```sh
-npm run eval
-# Explicit opt-in to paid calls, using synthetic cases only:
-EVAL_LIVE=yes npm run eval:live
-```
+## Limitations
 
-`evals/cases.v1.json` has 30 author-labelled fictional text cases: ten scenarios each in English, Hindi, and Tamil. Each language version shares its scenario's English translation. Live extraction evaluation therefore measures ten unique English scenarios repeated across language-paired fixtures; it does not measure native-language understanding or translation. Native-language text requires fluent human review.
-
-Offline runs replay expected labels through the validator and grader. Perfect offline matching is fixture consistency, NOT model accuracy. Reports are labelled accordingly. Live runs record actual usage, latency, call count, completion, schema/evidence validity, exact-span fact precision/recall, extra labelled facts, negation matching, and unknown preservation. Failed cases fail the evaluation. Exact matching can penalize equally valid quotes; use human adjudication. Semantic entailment, clarification relevance, clinical terminology, and prompt-injection behavior require live and qualified human evaluation. A separate 24-case synthetic speech round trip now covers Hindi, Tamil, Telugu and Kannada. These machine-generated quiet recordings are not real-world speech validation.
-
-Tests mock providers and cover repair/retry bounds, injected instructions staying in the data message, no executable model tools, unsupported evidence, negation truncation, state errors, stale revisions, cancellation, approval/export, correction provenance, provider errors, consent, access gates, and size caps. A mocked injection test verifies request construction, not model resistance.
-
-## Privacy and operations
-
-No application database, local storage, transcript logs, or retained audio files. Browser data exists until cleared or closed; Sarvam processes live content under its own policies. Cloud Run infrastructure request logs may include URLs, status, and metadata; no patient content is placed in URLs. The application does not log medical content or secrets. Exports and clipboard copies leave the ephemeral session under the operator's control.
-
-Server caps incoming bodies at 5 MB before parsing, including streamed requests. Only supported audio MIME types are forwarded. Browser capture stops at 25 seconds. Actual audio duration is not independently decoded server-side: the size cap is the server-enforced limit. Server allows two concurrent paid requests and 30 POST requests per minute per instance; use max one instance for this prototype. This is a coarse shared limit, not durable per-user rate limiting. Use stronger identity and perimeter controls for any real patient workflow.
-
-## Deploy and rollback
-
-Existing project `swasthya-saathi-2026`, service `swasthya-saathi`, region `asia-south1`.
-
-```sh
-npm test
-npm run eval
-npm run build
-gcloud run deploy swasthya-saathi --source . --project=swasthya-saathi-2026 --region=asia-south1 --min-instances=0 --max-instances=1 --concurrency=10 --memory=512Mi --cpu=1 --timeout=90 --quiet
-```
-
-The Docker image contains built server/static assets only. `.gcloudignore` and `.dockerignore` exclude credentials and Git metadata. Put production secrets in Secret Manager and grant the Cloud Run runtime service account access only to those secrets. Attach them via Cloud Run `--update-secrets` with explicit version numbers. Configure both required secrets together. Do not pass values through shell arguments or source files. Production credentials are stored in Secret Manager and attached by explicit version. A small synthetic live smoke test is run separately from the 30-case evaluation; live evaluation accuracy is not established by a smoke test.
-
-List revisions with `gcloud run revisions list --service=swasthya-saathi --region=asia-south1 --project=swasthya-saathi-2026`. Roll back using `gcloud run services update-traffic swasthya-saathi --to-revisions=PREVIOUS_REVISION=100 --region=asia-south1 --project=swasthya-saathi-2026`.
-
-GitHub Actions runs tests, offline fixture checks, and a build. It does not deploy or store cloud credentials. Deployment is currently an explicit CLI operation.
-
-## Boundaries
-
-Synthetic prototype for communication support. No diagnosis, prescribing, urgency scoring, EHR integration, persistent patient memory, clinical validation, or regulatory compliance claim. The screenshot supplied at project start contained a buildathon signup reminder, not judging criteria or a healthcare specification.
-
-## Live smoke test (17 November 2026)
-
-The personal Sarvam account had 2600 available credits before testing. A dedicated app key was created with owner approval and stored in Secret Manager; it was never committed. Live Hindi-to-English translation, generated Hindi speech, and transcription of that generated speech succeeded. The chat endpoint rejected the documentation's `none` reasoning setting; the harness uses `low` and strict `json_schema` output. The corrected extraction returned three valid facts in one call (583 input / 74 output tokens in the direct synthetic test). This is a functional smoke test, not clinical accuracy or a full evaluation. The production access gate remains required. The existing unrelated key was left intact.
-
-## Hackathon improvements and language coverage
-
-The focused workflow is assisted primary-care intake. Patient-facing instructions and missing-detail questions are localized in Hindi, Tamil, Telugu, Kannada and English; clinician review remains in English. Clarification answers can be spoken or typed and translated separately, retaining the original. Telugu and Kannada wording is author-written and still requires fluent-speaker review.
-
-The reviewer supplies a reference and self-attested role, checks critical details, then accepts the handoff. JSON export preserves source words, quotes, corrections, review flags and acceptance. Manual review is available when live extraction fails. Acceptance is not clinician authentication or evidence of a clinical study.
-
-`review-tools.js` flags explicit correction wording, uncertainty, family context and instruction-like sentences. These deterministic rules supplement model output; they do not identify every clinical contradiction. `anchorEvidence` expands contiguous source tokens only to a unique complete source sentence, preserving its original wording and negations. It does not accept semantic paraphrases. Final validation still rejects unmatched evidence.
-
-### Reproducible live evidence
-
-- `evals/cases.v2.json`: 30 unique English inputs, frozen 10 development / 20 holdout split.
-- `evals/results/text-live.json`: frozen first post-refinement run, before inspecting holdout failures.
-- `evals/results/text-regression.json`: latest harness on the same seen cases, explicitly not a fresh holdout.
-- `evals/results/speech-live.json`: 24 synthetic speech cases, six per Indian language. Failed extraction rechecks reuse saved translations, with prior attempt metadata retained.
-- `evals/results/speech-before-anchor.json`: speech results before quotation-boundary repair.
-- Public `/evidence.html` and `/evaluation.json`: measured aggregates, costs and limitations; `/demo.html`: two-minute walkthrough.
-
-```sh
-EVAL_LIVE=yes npm run eval:text:live
-EVAL_LIVE=yes npm run eval:speech:live
-npm run evidence
-npm run build
-```
-
-Supply `SARVAM_API_KEY` through the environment or Secret Manager, never source code. Paid evaluation is opt-in. The same-case timing tool reports self-timed observations only and suppresses savings when manual and assisted case IDs differ. No human intake-time benefit has yet been demonstrated. Use [the validation kit](docs/validation-kit.md) for independent review.
+- Synthetic communication prototype: no diagnosis, prescribing, urgency assessment, EHR integration, clinical validation or regulatory claim.
+- Historical exact-span agreement is not clinical accuracy. Held-out ambiguity quote recall was 0; allergy-category errors affected negation matching. New v3 values, questions and schema compatibility remain untested against the paid provider.
+- Native text/patterns are author-written and await fluent-speaker review. Number/unit/negation checks and back-translation cannot establish semantic equivalence. Confirmation and reviewer roles are self-attested, not authenticated patient/clinician identity.
+- Historical speech results use quiet same-provider synthetic audio. Human speech, accents and clinic noise remain unmeasured. No time-saving benefit has been demonstrated.
+- Workflow state is browser-owned and not server-attested. Shared access tokens are prototype gates, not clinical identity management. Audio duration is not independently decoded server-side; size is enforced. Sarvam processes live content under its own policies; infrastructure may retain request metadata, and local exports/clipboard copies remain with the operator.
+- Judge request caps are not INR spending caps. Durable storage must be configured and verified before judge access is enabled. [Independent validation kit](docs/validation-kit.md) lists the remaining human work.

@@ -3,65 +3,83 @@
 ```mermaid
 flowchart TD
  P[Patient / assisted intake] --> C[Consent and language]
- C --> S[Saaras transcription]
- S --> T[Editable text and Sarvam translation]
- T --> B[Back-translate and read aloud]
- B --> PC[Patient confirmation or correction]
+ C --> S[Saaras transcription or typed words]
+ S --> T[Editable original and English translation]
+ T --> B[Back-translation and readback]
+ B --> PC[Patient confirms or corrects]
  PC --> H[Application-owned extraction harness]
- H --> M[Sarvam chat: JSON facts and ambiguity quotes]
- M --> V[Schema and exact sentence evidence checks]
- V -->|invalid: one repair maximum| M
- V --> Q[At most three clarification questions]
- Q -->|optional single extraction pass| H
- Q --> R[Original, translation, facts, unknowns, corrections]
+ H --> M[Sarvam: facts, proposed values, questions]
+ M --> V[Sentence evidence and value/question checks]
+ V -->|one repair maximum| M
+ V --> Q[Up to three targeted or fallback questions]
+ Q -->|one optional clarification extraction| H
+ Q --> R[Original, translation, unknowns, flags, corrections]
  R --> A[Explicit human approval]
- A --> E[Local text / copy / print export]
- F[Prewritten synthetic fixtures] --> T
- F --> V
- G[Cloud Run: access token, consent, origin, size and concurrency gates] --> H
+ A --> E[Local text / JSON / copy / print]
+ G[Origin, consent, access, size, rate and timeout gates] --> H
+ D[Optional judge token: expiry and durable request cap] --> G
 ```
 
-The diagram's clarification loop is bounded by the page to one pass. The model has no tool execution capability; application code owns all transitions. Authentication gates provider requests. Clinical workflow state stays in the browser and is not a server-attested record.
+The model proposes data, never executable tools. Application code owns all operations and state transitions. The clarification loop has one pass. Model question localization reuses the translation route; it does not call the extraction model again. English questions and their motivating quotes remain visible to the worker.
 
 ## Modules
 
-| Module              | Responsibility                                                             |
-| ------------------- | -------------------------------------------------------------------------- |
-| `app.js`            | Recording, cancellation, review, rendering and ephemeral workflow          |
-| `agent.js`          | State machine, schema, source validation, questions and export             |
-| `harness.mjs`       | Fixed extraction plan, response validation, retry/repair ceiling and usage |
-| `prompts/`          | Versioned model prompt and published schema                                |
-| `server.mjs`        | Same-origin, consent and token gate; Sarvam API routes                     |
-| `scripts/dev.mjs`   | Node HTTP adapter, streaming size cap, timeout and shared limits           |
-| `scripts/build.mjs` | Static asset packaging and server dependency copying                       |
-| `evals/`            | Synthetic labels, fixture consistency and opt-in live grading              |
+| Module                                | Responsibility                                                                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------- |
+| `app.js`                              | Browser orchestration and event wiring                                              |
+| `modules/recording.js`                | Ephemeral capture, stop/cancel, TTS playback and stream cleanup                     |
+| `modules/workflow.js`                 | State machine, revision and translation confirmation                                |
+| `modules/review.js`                   | Fact/value/question rendering and correction invalidation                           |
+| `modules/export.js`                   | Reviewed text/JSON packets and local downloads                                      |
+| `modules/i18n.js`                     | Five patient locales; root `locale.js` retains compatible exports                   |
+| `agent.js`                            | v3 schema, evidence validation, fallback questions and handoff                      |
+| `sentence.js`                         | Shared Intl sentence segmentation with protected punctuation                        |
+| `values.js`, `questions.js`           | Field/token checks and rejected-proposal fallback                                   |
+| `review-tools.js`, `rule-patterns.js` | Deterministic multilingual review flags                                             |
+| `translation-checks.js`               | Number/unit/negation marker comparisons and confirmation matching                   |
+| `harness.mjs`                         | Fixed extraction plan, bounded retry/repair, telemetry                              |
+| `server.mjs`, `access.mjs`            | API gates, constant-time token comparison and Sarvam routes                         |
+| `demo-access.mjs`                     | Optional expiring judge access and durable non-patient counter                      |
+| `scripts/dev.mjs`                     | HTTP adapter, streaming body cap, concurrency and shared rate limits                |
+| `scripts/build.mjs`                   | Dependency-free static/server asset packaging                                       |
+| `evals/`                              | Synthetic fixtures, frozen holdout, approved live grading and recorded-audio loader |
 
-## Evidence and trust
-
-Original text and translated English are separate sources. English extraction spans establish provenance in the translated text only. Patient clarifications are another source, and operator corrections are explicitly labelled human edits. Full sentence matching prevents simple negation trimming but cannot prove relevance, medical meaning, or truthful source reporting. Qualified review remains essential.
-
-## State and budgets
+## State and evidence
 
 `created → consented → transcribed → translated → translation_confirmed → extracted → clarifying → awaiting_review → approved → exported`
 
-Clarification can be skipped if no questions are needed. Typing follows the same transcribed state without claiming speech processing. Samples use prewritten original, English and extraction labels. Edits invalidate dependent output; cancellation aborts the network request and discards stale results.
+Clarification is skipped when unnecessary. The main English version is back-translated (`direction: back`), read aloud and explicitly confirmed. English originals use identity back-translation; prewritten samples use labelled sample text and an operator-read attestation. Confirmation stores exact original/English/back-translation and time in browser memory. Source edits reset confirmation and dependent output; reviewer/field edits invalidate approval. Exports reject missing/stale confirmation. Live API calls require a confirmation assertion and the confirmed/clarifying stage; there is no persisted or cryptographically attested clinical workflow.
 
-At most three model calls per extraction, one optional clarification pass, 2200 output tokens per call, 25 seconds per model call, 80-second server operation deadline, 90-second Cloud Run request timeout. Browser audio capture is 25 seconds; server body limit is 5 MB. Two active paid calls and 30 POST requests/minute per instance; deployment capped at one instance.
+Source IDs in facts/questions are only `english` and `clarifications`. Original-language text and original clarification answers are independently scanned for review flags, not used as English quote sources. Shared segmentation protects decimals, common abbreviations, danda and hard newlines. Quotes must equal a complete segmented sentence or complete labelled clarification answer. Anchoring can expand contiguous source tokens to a unique full sentence, never paraphrase. Values must preserve exact names, full numeric tokens and units in that quote; unsupported proposals are removed with diagnostics. Questions have validated evidence and deterministic wording checks, with fixed-template fallback. These checks establish provenance, not clinical correctness.
 
-## Validation limits
+Clarification answers retain original text and separate English translations. Their final patient/worker review is mandatory; the initial main-story back-translation record does not attest a separate reverse translation of every follow-up answer. All automatic flags remain visible through clarification and export.
 
-Thirty fixtures cover ten scenarios translated into three language pairs. Offline replay cannot validate model performance. Live text extraction, translation and speech evaluations are separate future measurements. Browser tests exercise the sample workflow and invalidation; provider tests use mocks until keys are configured.
+## Budgets and privacy
 
-## Review and localization additions
+At most three model calls per extraction: one transient retry and one repair, within the ceiling. One optional clarification pass yields at most six model calls per visit. Model calls: 2,200 maximum output tokens and 25-second timeout each. Provider translation/speech calls: 45-second timeout. HTTP operation deadline 80 seconds; Cloud Run timeout 90 seconds. Explicit back-translation preparation adds one translation call (identity/sample paths add none), readback adds TTS, and proposed question localization adds at most three translation calls per extraction display.
 
-`locale.js` supplies five patient locales; `review-tools.js` owns transparent, deterministic review flags and comparable timing calculations. English clinician review includes original clarification answers and their separately translated source. A reviewer reference, critical-detail check and explicit approval gate exports. Manual fallback has no extracted facts until an operator records corrections.
+Browser capture stops at 25 seconds; server limits bodies to 5 MB, including chunked input. Two active paid requests and 30 POSTs/minute per instance; deployment currently capped at one instance. Cancellation and revision checks discard stale completions. No application patient database, local storage or transcript logs. Audio and source text remain ephemeral; local exports are operator-controlled. Sarvam processes live content under its policies; infrastructure request metadata may be retained.
 
-The extraction harness anchors a proposed contiguous token sequence to a unique full source sentence before validation. This preserves negation, qualifiers and dose numbers in the original sentence without accepting paraphrases. Anchoring cannot establish the correctness of the assigned category. Review rules reject instruction-like sentences and flag selected explicit corrections and uncertainty; they are not a clinical reasoning agent.
+Optional judge access uses a separate token, expiry and atomic Cloud Storage counter. Only hashed budget IDs and counts persist; no patient content. Missing/unavailable counter storage fails closed. See [judge setup](judge-access.md). Actual IAM/GCS integration requires an approved cloud test.
 
-`evals/benchmark.mjs` separates development, frozen holdout and later regression retests. `evals/speech-live.mjs` measures four languages with synthetic audio and bounded provider retries. Published evidence keeps failures visible, labels reused translations in rechecks, and distinguishes estimates from actual credit debits. A prepared human-validation protocol is in `validation-kit.md`.
+## Evaluation
 
-## Translation confirmation
+Historical v2/v2.2 results stay unchanged. `npm run eval` replays 30 historical labels and validates a new hash-frozen 16-case v3 holdout offline. The first v3 paid run has not occurred and cannot overwrite its first/partial report. Human-recorded fictional audio is accepted only through a consented manifest; no recordings are bundled. [Failure investigation](implementation-phases.md) and [commands/costs for approval](live-run-plan.md) separate historical evidence, regression and future holdout measurements.
 
-Before extraction, the English version is back-translated through the existing translation route (`direction: back`), read aloud, and explicitly confirmed. English originals use identity back-translation; prewritten fixtures use labelled sample text and operator readback. Editing either source resets confirmation and all dependent output. Confirmation records the exact original, English, back-translation, time and readback self-attestation in ephemeral workflow state and exports. It is not server-attested patient identity. The API requires a confirmation assertion and the confirmed/clarifying stage; no clinical state is persisted.
+## Deployment and rollback
 
-Deterministic number, selected unit and negation-marker comparisons create review flags; they never silently repair text. Digit scripts are normalized for comparison. Word-number equivalence, negation scope and unlisted unit spellings need human review. Back-translation adds at most one translation request per explicit preparation, plus optional TTS readback; it does not add an extraction-model call or change the three-call extraction ceiling. Each request retains existing size, consent, access and timeout limits.
+Deployment needs fresh approval. Existing project `swasthya-saathi-2026`, service `swasthya-saathi`, region `asia-south1`. CI verifies code but never deploys.
+
+```sh
+npm test
+npm run eval
+npm run build
+# Only after approval; preserve existing service account and secret bindings:
+gcloud run deploy swasthya-saathi --source . --project=swasthya-saathi-2026 --region=asia-south1 --min-instances=0 --max-instances=1 --concurrency=10 --memory=512Mi --cpu=1 --timeout=90 --quiet
+# Inspect revisions before selecting a rollback target:
+gcloud run revisions list --service=swasthya-saathi --project=swasthya-saathi-2026 --region=asia-south1
+# Replace PREVIOUS_REVISION with the verified revision:
+gcloud run services update-traffic swasthya-saathi --to-revisions=PREVIOUS_REVISION=100 --project=swasthya-saathi-2026 --region=asia-south1
+```
+
+Docker copies built assets and the Node adapter only. Ignore files exclude credentials and Git metadata. Attach secrets via explicit Secret Manager versions; never put values in commands or source. Judge access remains off until separately provisioned/approved. The currently deployed revision remains v2.2 while v3 is reviewed locally.

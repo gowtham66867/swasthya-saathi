@@ -25,6 +25,11 @@ if (live) {
   }
 }
 const runs = [];
+const plannedCases = JSON.parse(bytes).length;
+const valueKey = (v) =>
+  JSON.stringify(
+    Object.entries(v || {}).sort(([a], [b]) => a.localeCompare(b)),
+  );
 const key = (f) => JSON.stringify([f.field, f.quote, f.sourceId]);
 for (const c of JSON.parse(bytes)) {
   const sources = {
@@ -55,10 +60,25 @@ for (const c of JSON.parse(bytes)) {
     valueTargets: valueTargets.length,
     valueExact: valueTargets.filter(
       (f) =>
-        JSON.stringify(f.value) ===
-        JSON.stringify(raw.facts.find((x) => key(x) === key(f))?.value),
+        valueKey(f.value) ===
+        valueKey(raw.facts.find((x) => key(x) === key(f))?.value),
     ).length,
     expectedSignalKinds: c.expectedSignalKinds,
+    expectedSignalsMatched: (c.expectedSignalKinds || []).filter((kind) =>
+      reviewed.signals.some((signal) => signal.kind === kind),
+    ).length,
+    expectedTranslationFlags: c.expectedTranslationFlags,
+    translationFlagsMatched: (c.expectedTranslationFlags || []).filter((kind) =>
+      translationSignals(c.original, c.english).some(
+        (signal) => signal.kind === kind,
+      ),
+    ).length,
+    ambiguityExpected: c.expected.ambiguities.length,
+    ambiguityMatched: c.expected.ambiguities.filter((a) =>
+      raw.ambiguities.some(
+        (x) => x.quote === a.quote && x.sourceId === a.sourceId,
+      ),
+    ).length,
     signals: reviewed.signals,
     translationFlags: translationSignals(c.original, c.english),
     result: live ? raw : undefined,
@@ -78,9 +98,11 @@ for (const c of JSON.parse(bytes)) {
         2,
       ) + "\n",
     );
+  if (live && error) break; // Stop for approval/review after the first failed case.
 }
 const report = {
-  status: "complete",
+  status: live && runs.length < plannedCases ? "aborted" : "complete",
+  plannedCases,
   version: VERSION,
   kind: live
     ? "First frozen v3 synthetic run"

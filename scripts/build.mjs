@@ -46,6 +46,7 @@ for (const name of [
   "translation-checks.js",
   "questions.js",
   "access.mjs",
+  "demo-access.mjs",
   "modules",
   "prompts",
 ])

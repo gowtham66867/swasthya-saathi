@@ -1,5 +1,13 @@
 {
-  "generatedAt": "2026-11-17T16:42:52.747Z",
+  "generatedAt": "2026-11-17T17:58:23.381Z",
+  "implementation": {
+    "version": "intake-v3",
+    "liveEvaluated": false,
+    "measurementVersions": [
+      "intake-v2.1",
+      "intake-v2.2"
+    ]
+  },
   "study": "Author-labelled synthetic data; no clinician or fluent-speaker adjudication",
   "baseline": {
     "cases": 10,

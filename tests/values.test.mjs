@@ -86,3 +86,16 @@ test("values remain paired with quotes in handoff and operator edits are separat
   assert.match(text, /Operator value correction/);
   assert.equal(result.facts[0].value.dose, "2.5");
 });
+
+test("different proposed values cannot disguise duplicate source facts", () => {
+  const result = {
+    facts: [fact, { ...fact, value: { name: "amlodipine" } }],
+    ambiguities: [],
+  };
+  assert.ok(
+    validateExtraction(result, {
+      english: fact.quote,
+      clarifications: "",
+    }).includes("Duplicate fact"),
+  );
+});

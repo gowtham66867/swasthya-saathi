@@ -54,8 +54,9 @@ export function prepareReviewExport(data) {
     "\n\nORIGINAL CLARIFICATION ANSWERS\n" +
     (originalAnswers || "Not provided") +
     "\n\nREVIEW FLAGS\n" +
-    (signals.map((s) => s.text + " “" + s.quote + "”").join("\n") ||
-      "No automatic flags; human review still required.");
+    (signals
+      .map((s) => s.text + (s.quote ? " “" + s.quote + "”" : ""))
+      .join("\n") || "No automatic flags; human review still required.");
   return {
     text,
     acceptance,

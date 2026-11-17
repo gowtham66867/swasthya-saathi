@@ -49,3 +49,21 @@ Added two tests for frozen integrity/schema and audio consent/duplicate/path/sym
 Formatted source, styles, markup, tests and documentation with pinned Prettier 3.6.2 (development tool only; no runtime dependency). Frozen/historical evidence and generated bundles are excluded from formatting. Split browser media, workflow, review rendering, exports and i18n into `modules/`; kept public imports compatible. Added `access.mjs` using `crypto.timingSafeEqual` on fixed-size digests. Updated the five-language meta description and packaging.
 
 Added five module/token/media/markup integration tests. Browser testing exposed missing Phase 4 confirmation markup; added the controls and a regression checking all static element references. Verified locally: Telugu sample → back-translation/readback attestation → confirmation → extraction → clarification → approved text/JSON-ready handoff. Editing English cleared confirmation, facts and approval. No live APIs called. Checks: 139 tests passed; offline 46/46 valid; build passed. Real microphone/device and paid-provider integration remain unverified.
+
+## Phase 8 — Judge path and concise documentation
+
+Changed `demo-access.mjs`, protected route authorization, `.env.example`, packaging, README, architecture, judge setup and demo/evidence generation. A separate judge token requires an absolute expiry, request cap and durable private GCS counter; atomic generation/metageneration preconditions preserve the cap across restarts/concurrency. Unavailable storage fails closed. No cloud resources, permissions or credentials were created. README now starts with problem/audience, a five-step demo, three historical measured numbers and architecture, with consolidated limitations. Historical pages are explicitly marked as pre-v3 evidence. Prewritten medication/allergy samples demonstrate proposed values without paid calls.
+
+Final integration checks also preserve diagnostics across clarification, validate original-language clarification flags, reject duplicate facts disguised by different values, require `questions` in v3 model responses, and stop the first frozen live run on its first failure. Historical fixtures remain compatible. The published v3 schema matches runtime schema.
+
+Added 12 demo-budget/delivery/integration regressions. Checks: 151 tests passed; offline 30/30 historical + 16/16 v3 valid; build passed. Mocked budget tests cover expiry, configuration, storage errors, counter persistence and concurrent CAS; actual GCS/IAM/metadata authentication is unverified. No paid evaluation, deployment, judge provisioning or new GitHub push occurred during this task.
+
+## Remaining human work
+
+- Fluent-speaker review of native wording, heuristic patterns and new questions in Hindi, Tamil, Telugu and Kannada.
+- Qualified clinician adjudication of facts, proposed values, ambiguity labels, question usefulness and handoff acceptance.
+- Actual consented recordings of fictional stories plus reviewed reference transcripts; no recordings were fabricated.
+- Approval for the first paid v3 holdout (rough estimate ₹0.5–₹2; conservative ₹15 planning allowance), then separate approval for other live suites and review of failures/provider schema compatibility.
+- Approval for deployment; separately approve judge secret/bucket/IAM setup if that path should be enabled. The current deployed v2.2 app is unchanged.
+
+Final runtime verification used Node v22.23.5: all tests, both offline fixture evaluators and the build passed. Source formatting and `git diff --check` passed. No runtime dependencies were added.

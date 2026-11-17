@@ -111,7 +111,11 @@ export function anchorEvidence(result, sources) {
     expansions,
   };
 }
-export function validateExtraction(result, sources) {
+export function validateExtraction(
+  result,
+  sources,
+  { requireQuestions = false } = {},
+) {
   const errors = [];
   if (
     !result ||
@@ -124,6 +128,8 @@ export function validateExtraction(result, sources) {
     !Array.isArray(result.ambiguities)
   )
     return ["Invalid extraction schema"];
+  if (requireQuestions && !Array.isArray(result.questions))
+    errors.push("Questions array required for v3 model output");
   if (result.questions !== undefined) {
     if (!Array.isArray(result.questions) || result.questions.length > 3)
       errors.push("Invalid questions");
@@ -162,7 +168,7 @@ export function validateExtraction(result, sources) {
       );
     // Evidence is displayed verbatim: the model cannot introduce a separate unsupported value.
   }
-  const unique = new Set(result.facts.map((f) => JSON.stringify(f)));
+  const unique = new Set(result.facts.map(factKey));
   if (unique.size !== result.facts.length) errors.push("Duplicate fact");
   return errors;
 }

@@ -172,3 +172,26 @@ test("anchoring rejects paraphrases and nonunique matches", () => {
     0,
   );
 });
+
+test("review diagnostics survive clarification passes without duplicates", async () => {
+  const { mergeReviewSignals } = await import("../review-tools.js");
+  const removed = {
+    kind: "unsupported-value",
+    quote: "I take 2.5 mg.",
+    sourceId: "english",
+    text: "Value removed",
+  };
+  const translation = { kind: "translation-numbers", text: "Mismatch" };
+  const next = mergeReviewSignals([removed, translation], [translation]);
+  assert.equal(next.length, 2);
+  const native = applyReviewRules(
+    { facts: [], ambiguities: [] },
+    { originalClarifications: "allergies: నాకు తెలియదు." },
+  );
+  assert.ok(
+    native.signals.some(
+      (s) =>
+        s.kind === "uncertainty" && s.sourceId === "originalClarifications",
+    ),
+  );
+});

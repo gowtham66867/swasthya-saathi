@@ -22,7 +22,9 @@ export function renderFactCards({
   $("overview").replaceChildren();
   for (const text of [
     `${overview.known.length}/8 fields reported · ${overview.unknown.length} unknown`,
-    ...signals.map((s) => `${s.text} “${s.quote}” (${s.sourceId})`),
+    ...signals.map(
+      (s) => s.text + (s.quote ? ` “${s.quote}” (${s.sourceId})` : ""),
+    ),
   ]) {
     const p = document.createElement("p");
     p.textContent = text;

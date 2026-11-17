@@ -5,3 +5,6 @@
 !.env.example
 node_modules/
 evals/report.live.json
+# Never upload locally consented recordings as deployment source.
+evals/audio-private/
+evals/results/human-speech.json

@@ -895,3 +895,24 @@ export const CASES = [
     },
   },
 ];
+
+// Author-labelled v3 demonstration hints; these are prewritten, not AI results.
+for (const sample of CASES) {
+  for (const fact of sample.expected.facts) {
+    if (
+      fact.field === "medicines" &&
+      fact.quote === "I take metformin 500 mg twice daily."
+    )
+      fact.value = {
+        name: "metformin",
+        dose: "500",
+        unit: "mg",
+        frequency: "twice daily",
+      };
+    if (
+      fact.field === "allergies" &&
+      fact.quote === "I am allergic to penicillin."
+    )
+      fact.value = { substance: "penicillin", negated: false };
+  }
+}

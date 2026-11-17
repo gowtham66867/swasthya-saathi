@@ -124,3 +124,21 @@ export const canApprove = ({ state, reviewer, critical }) =>
   typeof reviewer === "string" &&
   reviewer.trim().length > 0 &&
   critical === true;
+
+export function mergeReviewSignals(...groups) {
+  return [
+    ...new Map(
+      groups
+        .flat()
+        .map((signal) => [
+          JSON.stringify([
+            signal.kind,
+            signal.sourceId,
+            signal.quote,
+            signal.text,
+          ]),
+          signal,
+        ]),
+    ).values(),
+  ];
+}

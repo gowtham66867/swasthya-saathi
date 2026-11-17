@@ -1,4 +1,4 @@
-import { tokenEqual } from "./access.mjs";
+import { authorizeAccess, demoConfiguration } from "./demo-access.mjs";
 import { applyReviewRules } from "./review-tools.js";
 import { VERSION } from "./agent.js";
 import { runExtraction } from "./harness.mjs";
@@ -23,11 +23,19 @@ const json = (body, status = 200) =>
       "X-Content-Type-Options": "nosniff",
     },
   });
-export async function handleApi(request, env) {
+export async function handleApi(
+  request,
+  env,
+  { demoStore, now = Date.now } = {},
+) {
   const path = new URL(request.url).pathname;
   if (path === "/api/status" && request.method === "GET")
     return json({
-      ready: Boolean(env.SARVAM_API_KEY && env.LIVE_ACCESS_TOKEN?.length >= 32),
+      ready: Boolean(
+        env.SARVAM_API_KEY &&
+          (env.LIVE_ACCESS_TOKEN?.length >= 32 ||
+            demoConfiguration(env)?.expires > now()),
+      ),
       provider: "Sarvam",
       mode: "synthetic-demo",
       version: VERSION,
@@ -59,18 +67,12 @@ export async function handleApi(request, env) {
       },
       503,
     );
-  if (
-    !env.LIVE_ACCESS_TOKEN ||
-    env.LIVE_ACCESS_TOKEN.length < 32 ||
-    !tokenEqual(
-      request.headers.get("Authorization"),
-      "Bearer " + env.LIVE_ACCESS_TOKEN,
-    )
-  )
-    return json(
-      { error: "Live processing requires the server-configured access token." },
-      401,
-    );
+  const access = await authorizeAccess(
+    request.headers.get("Authorization"),
+    env,
+    { store: demoStore, now, signal: request.signal },
+  );
+  if (!access.ok) return json({ error: access.error }, access.status);
   if (Number(request.headers.get("content-length")) > 5 * 1024 * 1024)
     return json(
       {
@@ -115,6 +117,12 @@ export async function handleApi(request, env) {
         (typeof data.original !== "string" || data.original.length > 2000)
       )
         return json({ error: "Invalid original text." }, 400);
+      if (
+        data.originalClarifications !== undefined &&
+        (typeof data.originalClarifications !== "string" ||
+          data.originalClarifications.length > 2000)
+      )
+        return json({ error: "Invalid original clarifications." }, 400);
       const output = await runExtraction(
         { english: data.text, clarifications: data.clarifications || "" },
         {
@@ -127,6 +135,7 @@ export async function handleApi(request, env) {
         ...output,
         ...applyReviewRules(output.result, {
           original: data.original || "",
+          originalClarifications: data.originalClarifications || "",
           english: data.text,
           clarifications: data.clarifications || "",
         }),

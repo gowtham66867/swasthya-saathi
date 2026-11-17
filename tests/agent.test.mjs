@@ -40,7 +40,15 @@ const valid = {
 };
 const output = (result = valid) =>
   Response.json({
-    choices: [{ message: { content: JSON.stringify(result) } }],
+    choices: [
+      {
+        message: {
+          content: JSON.stringify(
+            result ? { questions: [], ...result } : result,
+          ),
+        },
+      },
+    ],
     usage: { prompt_tokens: 10, completion_tokens: 20 },
   });
 test("schema rejects extra value and forbidden fields", () => {
