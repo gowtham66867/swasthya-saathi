@@ -1,0 +1,51 @@
+# Architecture
+
+```mermaid
+flowchart TD
+ P[Patient / assisted intake] --> C[Consent and language]
+ C --> S[Saaras transcription]
+ S --> T[Editable text and Sarvam translation]
+ T --> H[Application-owned extraction harness]
+ H --> M[Sarvam chat: JSON facts and ambiguity quotes]
+ M --> V[Schema and exact sentence evidence checks]
+ V -->|invalid: one repair maximum| M
+ V --> Q[At most three clarification questions]
+ Q -->|optional single extraction pass| H
+ Q --> R[Original, translation, facts, unknowns, corrections]
+ R --> A[Explicit human approval]
+ A --> E[Local text / copy / print export]
+ F[Prewritten synthetic fixtures] --> T
+ F --> V
+ G[Cloud Run: access token, consent, origin, size and concurrency gates] --> H
+```
+
+The diagram's clarification loop is bounded by the page to one pass. The model has no tool execution capability; application code owns all transitions. Authentication gates provider requests. Clinical workflow state stays in the browser and is not a server-attested record.
+
+## Modules
+
+| Module | Responsibility |
+| --- | --- |
+| `app.js` | Recording, cancellation, review, rendering and ephemeral workflow |
+| `agent.js` | State machine, schema, source validation, questions and export |
+| `harness.mjs` | Fixed extraction plan, response validation, retry/repair ceiling and usage |
+| `prompts/` | Versioned model prompt and published schema |
+| `server.mjs` | Same-origin, consent and token gate; Sarvam API routes |
+| `scripts/dev.mjs` | Node HTTP adapter, streaming size cap, timeout and shared limits |
+| `scripts/build.mjs` | Static asset packaging and server dependency copying |
+| `evals/` | Synthetic labels, fixture consistency and opt-in live grading |
+
+## Evidence and trust
+
+Original text and translated English are separate sources. English extraction spans establish provenance in the translated text only. Patient clarifications are another source, and operator corrections are explicitly labelled human edits. Full sentence matching prevents simple negation trimming but cannot prove relevance, medical meaning, or truthful source reporting. Qualified review remains essential.
+
+## State and budgets
+
+`created → consented → transcribed → translated → extracted → clarifying → awaiting_review → approved → exported`
+
+Clarification can be skipped if no questions are needed. Typing follows the same transcribed state without claiming speech processing. Samples use prewritten original, English and extraction labels. Edits invalidate dependent output; cancellation aborts the network request and discards stale results.
+
+At most three model calls per extraction, one optional clarification pass, 2200 output tokens per call, 25 seconds per model call, 80-second server operation deadline, 90-second Cloud Run request timeout. Browser audio capture is 25 seconds; server body limit is 5 MB. Two active paid calls and 30 POST requests/minute per instance; deployment capped at one instance.
+
+## Validation limits
+
+Thirty fixtures cover ten scenarios translated into three language pairs. Offline replay cannot validate model performance. Live text extraction, translation and speech evaluations are separate future measurements. Browser tests exercise the sample workflow and invalidation; provider tests use mocks until keys are configured.

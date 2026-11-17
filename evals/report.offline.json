@@ -1,0 +1,110 @@
+{
+  "mode": "offline labelled-fixture replay — NOT model accuracy",
+  "dataset": "cases.v1",
+  "cases": 30,
+  "completed": 30,
+  "schemaAndEvidenceValid": 30,
+  "exactFactPrecision": 1,
+  "exactFactRecall": 1,
+  "extraLabelledFactRate": 0,
+  "unknownPreservation": 1,
+  "negationExactMatch": 1,
+  "limitations": [
+    "Offline replay checks fixtures and grading only.",
+    "Exact matching penalizes semantically equivalent spans; human adjudication needed.",
+    "No speech/translation accuracy measured.",
+    "Semantic evidence entailment and injection resilience require live evaluation and qualified review."
+  ],
+  "runs": [
+    {
+      "id": "en-IN-headache"
+    },
+    {
+      "id": "en-IN-negation"
+    },
+    {
+      "id": "en-IN-allergy-denial"
+    },
+    {
+      "id": "en-IN-allergy-reported"
+    },
+    {
+      "id": "en-IN-medication"
+    },
+    {
+      "id": "en-IN-vague"
+    },
+    {
+      "id": "en-IN-conflict"
+    },
+    {
+      "id": "en-IN-history"
+    },
+    {
+      "id": "en-IN-question"
+    },
+    {
+      "id": "en-IN-injection"
+    },
+    {
+      "id": "hi-IN-headache"
+    },
+    {
+      "id": "hi-IN-negation"
+    },
+    {
+      "id": "hi-IN-allergy-denial"
+    },
+    {
+      "id": "hi-IN-allergy-reported"
+    },
+    {
+      "id": "hi-IN-medication"
+    },
+    {
+      "id": "hi-IN-vague"
+    },
+    {
+      "id": "hi-IN-conflict"
+    },
+    {
+      "id": "hi-IN-history"
+    },
+    {
+      "id": "hi-IN-question"
+    },
+    {
+      "id": "hi-IN-injection"
+    },
+    {
+      "id": "ta-IN-headache"
+    },
+    {
+      "id": "ta-IN-negation"
+    },
+    {
+      "id": "ta-IN-allergy-denial"
+    },
+    {
+      "id": "ta-IN-allergy-reported"
+    },
+    {
+      "id": "ta-IN-medication"
+    },
+    {
+      "id": "ta-IN-vague"
+    },
+    {
+      "id": "ta-IN-conflict"
+    },
+    {
+      "id": "ta-IN-history"
+    },
+    {
+      "id": "ta-IN-question"
+    },
+    {
+      "id": "ta-IN-injection"
+    }
+  ]
+}

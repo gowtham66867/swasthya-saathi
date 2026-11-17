@@ -1,5 +1,7 @@
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
-const assets={};for(const [path,type] of [['index.html','text/html; charset=utf-8'],['style.css','text/css'],['app.js','text/javascript']])assets['/'+(path==='index.html'?'':path)]={body:await readFile(path,'utf8'),type};
+import {readFile,mkdir,writeFile,cp} from 'node:fs/promises';
+const assets={};for(const [path,type] of [['index.html','text/html; charset=utf-8'],['style.css','text/css'],['app.js','text/javascript'],['agent.js','text/javascript'],['sample-cases.js','text/javascript']])assets['/'+(path==='index.html'?'':path)]={body:await readFile(path,'utf8'),type};
 const api=await readFile('server.mjs','utf8');await mkdir('dist/server',{recursive:true});
 await writeFile('dist/server/index.js',api+'\nconst assets='+JSON.stringify(assets)+';\nexport default { async fetch(request,env){const url=new URL(request.url);if(url.pathname.startsWith("/api/"))return handleApi(request,env);const asset=assets[url.pathname];if(!asset)return new Response("Not found",{status:404});return new Response(asset.body,{headers:{"Content-Type":asset.type,"Cache-Control":"no-store","X-Content-Type-Options":"nosniff","Referrer-Policy":"no-referrer","Permissions-Policy":"microphone=(self)","Content-Security-Policy":"default-src \'self\'; script-src \'self\'; style-src \'self\' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src \'self\'; media-src \'self\' blob:; object-src \'none\'; base-uri \'self\'"}});}};');
 console.log('Built dist/server/index.js');
+
+for(const name of ['agent.js','harness.mjs','prompts'])await cp(name,'dist/server/'+name,{recursive:true});
