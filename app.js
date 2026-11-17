@@ -1,4 +1,4 @@
-import {VERSION,Workflow,FIELDS,LABELS,validateExtraction,clarify,handoff} from './agent.js';
+import {VERSION,Workflow,FIELDS,LABELS,validateExtraction,clarify,handoff,retainAnswers} from './agent.js';
 import {CASES} from './sample-cases.js';
 const $=id=>document.getElementById(id);
 const flow=new Workflow();let ready=false,mode='manual',loaded=null,result=null,clarifications='',corrections={},busy=false,controller=null,recording=null,stream=null,timer=null,audioUrl=null,requestSerial=0;
@@ -20,7 +20,7 @@ function renderFacts(){
  $('facts').replaceChildren();const pending=clarify(result);
  for(const field of FIELDS){const card=document.createElement('section');card.className='fact-card';const h=document.createElement('h3');h.textContent=LABELS[field];card.append(h);const facts=result.facts.filter(f=>f.field===field);
  if(!facts.length){const p=document.createElement('p');p.className='unknown';p.textContent='Unknown — not reported';card.append(p);}
- for(const f of facts){const q=document.createElement('blockquote');q.textContent=f.quote;const small=document.createElement('small');small.textContent=`Evidence: ${f.sourceId} · ${mode==='sample'?'sample fixture':'extracted'} · classification requires review`;card.append(q,small);}
+ for(const f of facts){const q=document.createElement('blockquote');q.textContent=f.quote;const small=document.createElement('small');small.textContent=`Evidence: ${f.sourceId} · ${f.sourceId==='clarifications'?'operator-recorded answer':mode==='sample'?'sample fixture':'extracted'} · classification requires review`;card.append(q,small);}
  const label=document.createElement('label');label.textContent='Optional operator correction';const input=document.createElement('input');input.maxLength=500;input.placeholder='Keep evidence above, or record a correction';input.value=corrections[field]||'';input.addEventListener('input',()=>{corrections[field]=input.value;clearApproval();if(['approved','exported'].includes(flow.state)){flow.state='awaiting_review';renderState();}});label.append(input);card.append(label);$('facts').append(card);}
  if(result.ambiguities.length){const warn=document.createElement('p');warn.className='review-note';warn.textContent='Unresolved / ambiguous: '+result.ambiguities.map(a=>`“${a.quote}”`).join(' · ');$('facts').append(warn);}
  return pending;
@@ -36,7 +36,8 @@ $('translate').onclick=()=>task(async(signal,check)=>{const text=$('transcript')
 $('extract').onclick=()=>task(async(signal,check)=>{if(!$('english').value.trim()||!$('transcript').value.trim())throw Error('Review original words and English text first.');clearApproval();clarifications='';corrections={};translatedState();if(mode==='sample'&&loaded){extractionReady({result:structuredClone(loaded.expected)});return;}requireConsent();status('Extracting evidence with Sarvam…');const data=await api('extract',{text:$('english').value,stage:flow.state},signal);check();extractionReady(data);});
 $('clarify').onclick=()=>task(async(signal,check)=>{if(flow.state!=='clarifying')throw Error('Extract facts first.');const answers=[...$('questions').querySelectorAll('textarea')].map(el=>({field:el.dataset.field,text:el.value.trim()})).filter(x=>x.text);clarifications=answers.map(a=>`${a.field}: ${a.text}`).join('\n');
  if(answers.length&&mode!=='sample'){requireConsent();status('Checking clarification evidence…');const data=await api('extract',{text:$('english').value,clarifications,stage:'clarifying'},signal);check();if(validateExtraction(data.result,{english:$('english').value,clarifications}).length)throw Error('Clarification evidence is invalid.');result=data.result;$('agent-meta').textContent=`${data.meta.mode} · clarification pass · ${data.meta.calls} calls`;}
- else if(answers.length){for(const a of answers)if(FIELDS.includes(a.field))result.facts.push({field:a.field,quote:a.text,sourceId:'clarifications'});status('Sample answers recorded verbatim under operator-selected fields. No AI call.');}
+ else if(answers.length){status('Sample answers recorded verbatim under operator-selected fields. No AI call.');}
+ result=retainAnswers(result,answers);if(validateExtraction(result,{english:$('english').value,clarifications}).length)throw Error('Clarification evidence is invalid. Review and extract again.');
  renderFacts();$('clarification-panel').hidden=true;move('awaiting_review');status('Ready for human review. Unanswered details remain unknown.');});
 $('reviewed').onchange=()=>{clearApprovalOnly();if($('reviewed').checked&&flow.state==='awaiting_review')move('approved');else if($('reviewed').checked){$('reviewed').checked=false;status('Complete extraction and clarification before approval.');}else if(['approved','exported'].includes(flow.state)){flow.state='awaiting_review';renderState();}};
 function clearApprovalOnly(){$('summary-box').hidden=true;$('summary').textContent='';}

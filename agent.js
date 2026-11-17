@@ -41,3 +41,9 @@ export function handoff({reference,language,original,english,clarifications='',r
  const rows=FIELDS.map(field=>{const facts=result.facts.filter(f=>f.field===field);const correction=corrections[field]?.trim();return `${LABELS[field]}: ${correction?correction+' [operator correction — confirm with patient]':facts.length?facts.map(f=>f.quote).join(' | '):'Unknown — not reported'}\n${facts.map(f=>`  Evidence (${f.sourceId}): “${f.quote}”`).join('\n')}`;});
  return ['SWASTHYA SAATHI · PATIENT-REPORTED HANDOFF','For clinician review · no diagnosis or urgency assessment',`Reference: ${reference||'Not provided'}`,`Language: ${language}`,`Mode: ${mode}`,`Prompt/schema: ${VERSION}`,`Created: ${new Date().toISOString()}`,'','ORIGINAL PATIENT WORDS',original,'','ENGLISH VERSION — operator reviewed',english,'','CLARIFICATIONS — operator recorded',clarifications||'Not provided','',...rows,'','UNRESOLVED / AMBIGUOUS',...result.ambiguities.map(a=>`“${a.quote}” (${a.sourceId})`),'','Missing fields may remain unknown. Confirm details directly with the patient. Translation and classification can contain errors.'].join('\n');
 }
+
+export function retainAnswers(result,answers){
+ const facts=[...result.facts];
+ for(const answer of answers)if(FIELDS.includes(answer.field)&&answer.text?.trim()&&!facts.some(f=>f.field===answer.field&&f.sourceId==='clarifications'&&f.quote===answer.text))facts.push({field:answer.field,quote:answer.text,sourceId:'clarifications'});
+ return {...result,facts};
+}
