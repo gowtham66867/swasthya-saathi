@@ -3,7 +3,7 @@ import {runExtraction} from '../harness.mjs';
 import {validateExtraction,VERSION,FIELDS} from '../agent.js';
 if(process.env.EVAL_LIVE!=='yes'||!process.env.SARVAM_API_KEY)throw Error('Requires EVAL_LIVE=yes and SARVAM_API_KEY.');
 const baseline=process.argv.includes('--baseline');const regression=process.argv.includes('--regression');const cases=JSON.parse(await readFile(new URL('./cases.v2.json',import.meta.url),'utf8')).filter(c=>!baseline||c.split==='development');
-const path=new URL(baseline?'./results/baseline-development.json':regression?'./results/text-regression.json':'./results/text-live.json',import.meta.url);await mkdir(new URL('./results/',import.meta.url),{recursive:true});
+const path=new URL(baseline?'./results/v3-development-on-seen-cases.json':regression?'./results/v3-regression-on-seen-cases.json':'./results/v3-on-seen-cases.json',import.meta.url);await mkdir(new URL('./results/',import.meta.url),{recursive:true});
 const runs=[];
 const key=f=>JSON.stringify([f.field,f.quote,f.sourceId]);
 for(const c of cases){

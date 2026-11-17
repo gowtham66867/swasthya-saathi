@@ -37,3 +37,9 @@ Added five translation/state/API/export tests, and supplied confirmation records
 Changed `questions.js`, schema/prompt/harness, review rules, UI and packaging. Extraction requests at most three targeted questions in the same model call. Evidence, target fields, shape, length and wording are checked; invalid/empty proposals fall back to fixed templates without a repair call. English stays visible to the operator. Accepted questions translate through the existing route (at most three explicit localization calls); unavailable localization is labelled and its audio control disabled.
 
 Added eight question tests for same-call proposals, unsafe wording, evidence, count and fallback. Checks: 132 tests passed; offline 30/30 valid; build passed. Live provider schema acceptance, generated question usefulness and translation quality remain unverified.
+
+## Phase 6 — Frozen holdout and recorded-audio path
+
+Added a hash-frozen 16-case `cases.v3` holdout and free replay/opt-in first-run evaluator, an audio-manifest loader, a non-TTS human-speech runner and shared CER metrics. Added consent/path/size limits and ignored private recordings. Existing paid evaluators now write new filenames, preserving historical evidence. `docs/live-run-plan.md` contains commands and official-price estimates; the pre-prompt failure investigation appears above.
+
+Added two tests for frozen integrity/schema and audio consent/duplicate/path/symlink rejection. Checks: 134 tests passed; offline replay 30/30 historical + 16/16 v3 fixtures valid; build passed. No holdout model outputs were generated or used for tuning. No human audio exists in the repository; loader tests use explicitly non-recording placeholder bytes. Actual speech quality, provider compatibility and paid results remain unverified.

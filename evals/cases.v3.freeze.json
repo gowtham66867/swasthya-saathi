@@ -1,0 +1,6 @@
+{
+  "sha256": "42403a6565a9f23fc1dc06b6a8d55a67ae3f55c53a44cf8de66560276b87dac1",
+  "cases": 16,
+  "status": "Frozen before any model run. No tuning on this holdout.",
+  "created": "2026-11-17"
+}

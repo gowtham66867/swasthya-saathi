@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "id": "fictional_te_001",
+      "file": "recordings/fictional_te_001.wav",
+      "language": "te-IN",
+      "reference": "A fluent reviewer supplies the actual reference transcript here.",
+      "syntheticContent": true,
+      "consentToProcess": true
+    }
+  ]
+}
