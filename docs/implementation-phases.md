@@ -25,3 +25,9 @@ Negation exact matching changed from 13/14 to 12/14 between the frozen v2 run an
 Changed `values.js`, `agent.js` (intake-v3), `harness.mjs`, new `prompts/intake-v3.mjs`, review rendering/export in `app.js`, packaging and API version assertions. Optional field-specific values require exact bounded quote tokens, complete decimal numbers, and explicit denial wording for negation. Unsupported values are removed while retaining the quote and recording a review flag. Editable proposed hints remain alongside their quote; operator value edits export separately.
 
 Added nine value tests covering decimal doses, wrong units, unsupported names, uncertainty, negation and export provenance. Checks: 119 tests passed; offline 30/30 valid; build passed. Strict provider acceptance of the extended schema and live extraction quality are unverified (no paid calls).
+
+## Phase 4 — Translation confirmation
+
+Changed `translation-checks.js`, `agent.js`, `server.mjs`, `app.js`, `index.html`, architecture and packaging. Added back-translation direction, readback, explicit patient confirmation, `translation_confirmed` state and exact-content confirmation records. Source edits invalidate confirmation; exports reject stale/missing confirmation. Manual fallback also requires confirmed source text. Selected number/unit/negation mismatches remain visible review flags.
+
+Added five translation/state/API/export tests, and supplied confirmation records in existing export tests. Checks: 124 tests passed; offline 30/30 valid; build passed. No live back-translation or TTS was called. Confirmation is self-attested; the server asserts stage/confirmation without persisting patient state. Pattern scope and actual patient comprehension require human review.

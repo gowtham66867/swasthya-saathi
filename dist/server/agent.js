@@ -1,3 +1,4 @@
+import {confirmationMatches} from './translation-checks.js';
 import {VALUE_SCHEMA,valueIssues,factKey} from './values.js';
 import {evidenceUnits,wholeEvidence} from './sentence.js';
 export const VERSION='intake-v3';
@@ -45,18 +46,20 @@ export function clarify(result){
  for(const [field,text] of [['duration','When did this concern start?'],['medicines','What medicines are you currently taking, if any?'],['allergies','Do you have any known allergies?']])if(missing.includes(field))questions.push({field,text});
  return {missing,questions:questions.slice(0,3)};
 }
-const transitions={created:['consented','cancelled'],consented:['transcribed','cancelled','failed'],transcribed:['translated','cancelled','failed'],translated:['extracted','cancelled','failed'],extracted:['clarifying','awaiting_review','failed','cancelled'],clarifying:['awaiting_review','failed','cancelled'],awaiting_review:['approved','failed','cancelled'],approved:['exported','cancelled'],exported:['cancelled'],failed:['created'],cancelled:['created']};
+const transitions={created:['consented','cancelled'],consented:['transcribed','cancelled','failed'],transcribed:['translated','cancelled','failed'],translated:['translation_confirmed','cancelled','failed'],translation_confirmed:['extracted','cancelled','failed'],extracted:['clarifying','awaiting_review','failed','cancelled'],clarifying:['awaiting_review','failed','cancelled'],awaiting_review:['approved','failed','cancelled'],approved:['exported','cancelled'],exported:['cancelled'],failed:['created'],cancelled:['created']};
 export class Workflow{
- constructor(){this.state='created';this.revision=0;this.history=['created'];}
+ constructor(){this.state='created';this.revision=0;this.history=['created'];this.translationConfirmation=null;}
+ confirmTranslation(record){if(this.state!=='translated'||!confirmationMatches(record,record?.original,record?.english))throw Error('Read back and confirm the translation first.');this.translationConfirmation=structuredClone(record);this.move('translation_confirmed');}
  move(next){if(!transitions[this.state]?.includes(next))throw Error(`Invalid transition: ${this.state} → ${next}`);this.state=next;this.history.push(next);}
- reset(){this.state='created';this.revision++;this.history=['created'];}
+ reset(){this.state='created';this.revision++;this.history=['created'];this.translationConfirmation=null;}
  accept(revision){return revision===this.revision&&this.state!=='cancelled';}
 }
-export function handoff({reference,language,original,english,clarifications='',result,corrections={},valueCorrections={},reviewed,state,mode}){
+export function handoff({reference,language,original,english,clarifications='',result,corrections={},valueCorrections={},translationConfirmation,reviewed,state,mode}){
  if(!reviewed||!['approved','exported'].includes(state))throw Error('Patient review is required before export.');
+ if(!confirmationMatches(translationConfirmation,original,english))throw Error('Translation confirmation is stale.');
  if(validateExtraction(result,{english,clarifications}).length)throw Error('Invalid evidence. Extract again before export.');
  const rows=FIELDS.map(field=>{const facts=result.facts.filter(f=>f.field===field);const correction=corrections[field]?.trim();return `${LABELS[field]}: ${correction?correction+' [operator correction — confirm with patient]':facts.length?facts.map(f=>f.quote).join(' | '):'Unknown — not reported'}\n${facts.map(f=>`  Evidence (${f.sourceId}): “${f.quote}”${f.value?'\n  Proposed — verify against quote: '+JSON.stringify(f.value):''}${valueCorrections[factKey(f)]?'\n  Operator value correction — confirm with patient: '+valueCorrections[factKey(f)]:''}`).join('\n')}`;});
- return ['SWASTHYA SAATHI · PATIENT-REPORTED HANDOFF','For clinician review · no diagnosis or urgency assessment',`Reference: ${reference||'Not provided'}`,`Language: ${language}`,`Mode: ${mode}`,`Prompt/schema: ${VERSION}`,`Created: ${new Date().toISOString()}`,'','ORIGINAL PATIENT WORDS',original,'','ENGLISH VERSION — operator reviewed',english,'','CLARIFICATIONS — operator recorded',clarifications||'Not provided','',...rows,'','UNRESOLVED / AMBIGUOUS',...result.ambiguities.map(a=>`“${a.quote}” (${a.sourceId})`),'','Missing fields may remain unknown. Confirm details directly with the patient. Translation and classification can contain errors.'].join('\n');
+ return ['SWASTHYA SAATHI · PATIENT-REPORTED HANDOFF','For clinician review · no diagnosis or urgency assessment',`Reference: ${reference||'Not provided'}`,`Language: ${language}`,`Mode: ${mode}`,`Prompt/schema: ${VERSION}`,`Created: ${new Date().toISOString()}`,'','ORIGINAL PATIENT WORDS',original,'','ENGLISH VERSION — operator reviewed',english,'','TRANSLATION CONFIRMATION',JSON.stringify(translationConfirmation),'','CLARIFICATIONS — operator recorded',clarifications||'Not provided','',...rows,'','UNRESOLVED / AMBIGUOUS',...result.ambiguities.map(a=>`“${a.quote}” (${a.sourceId})`),'','Missing fields may remain unknown. Confirm details directly with the patient. Translation and classification can contain errors.'].join('\n');
 }
 
 export function retainAnswers(result,answers){

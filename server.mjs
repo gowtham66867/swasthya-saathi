@@ -19,7 +19,7 @@ export async function handleApi(request,env){
   const body=await new Blob(chunks).arrayBuffer();
   const parsed=new Request(request.url,{method:'POST',headers:request.headers,body});
   if(path==='/api/extract'){
-   const data=await parsed.json();if(!['translated','clarifying'].includes(data.stage))return json({error:'Extract only after translation or during clarification.'},409);
+   const data=await parsed.json();if(!['translation_confirmed','clarifying'].includes(data.stage)||data.translationConfirmed!==true)return json({error:'Confirm translation before extraction or clarification.'},409);
    if(data.original!==undefined&&(typeof data.original!=='string'||data.original.length>2000))return json({error:'Invalid original text.'},400);
    const output=await runExtraction({english:data.text,clarifications:data.clarifications||''},{key:env.SARVAM_API_KEY,model:env.SARVAM_TEXT_MODEL||'sarvam-105b',signal:request.signal});return json({...output,...applyReviewRules(output.result,{original:data.original||'',english:data.text,clarifications:data.clarifications||''})});
   }
@@ -32,7 +32,7 @@ export async function handleApi(request,env){
    const data=await parsed.json();if(typeof data.text!=='string'||!data.text.trim()||data.text.length>2000||!languages.has(data.language))return json({error:'Provide 1–2000 characters and a supported language.'},400);
    if(path==='/api/translate'&&data.language==='en-IN')return json({translated_text:data.text});
    headers['Content-Type']='application/json';
-   if(path==='/api/translate'){endpoint='translate';payload=JSON.stringify({input:data.text,source_language_code:data.language,target_language_code:'en-IN',model:'sarvam-translate:v1'});}
+   if(path==='/api/translate'){if(data.direction!==undefined&&!['forward','back'].includes(data.direction))return json({error:'Invalid translation direction.'},400);endpoint='translate';payload=JSON.stringify({input:data.text,source_language_code:data.direction==='back'?'en-IN':data.language,target_language_code:data.direction==='back'?data.language:'en-IN',model:'sarvam-translate:v1'});}
    else{endpoint='text-to-speech';payload=JSON.stringify({text:data.text,language_code:data.language,model:'bulbul:v3',speaker:'shubh',output_audio_codec:'wav'});}
   }
   const response=await fetch('https://api.sarvam.ai/'+endpoint,{method:'POST',headers,body:payload,signal:AbortSignal.timeout(45000)});
