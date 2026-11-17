@@ -20,7 +20,8 @@ export async function handleApi(request,env){
   const parsed=new Request(request.url,{method:'POST',headers:request.headers,body});
   if(path==='/api/extract'){
    const data=await parsed.json();if(!['translated','clarifying'].includes(data.stage))return json({error:'Extract only after translation or during clarification.'},409);
-   const output=await runExtraction({english:data.text,clarifications:data.clarifications||''},{key:env.SARVAM_API_KEY,model:env.SARVAM_TEXT_MODEL||'sarvam-105b',signal:request.signal});return json({...output,...applyReviewRules(output.result,{english:data.text,clarifications:data.clarifications||''})});
+   if(data.original!==undefined&&(typeof data.original!=='string'||data.original.length>2000))return json({error:'Invalid original text.'},400);
+   const output=await runExtraction({english:data.text,clarifications:data.clarifications||''},{key:env.SARVAM_API_KEY,model:env.SARVAM_TEXT_MODEL||'sarvam-105b',signal:request.signal});return json({...output,...applyReviewRules(output.result,{original:data.original||'',english:data.text,clarifications:data.clarifications||''})});
   }
   let endpoint,payload,headers={'api-subscription-key':env.SARVAM_API_KEY};
   if(path==='/api/transcribe'){
