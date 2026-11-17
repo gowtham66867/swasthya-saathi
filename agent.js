@@ -1,7 +1,25 @@
-export const VERSION='intake-v1.1';
+export const VERSION='intake-v2.2';
 export const FIELDS=['concern','symptoms','duration','severity','medicines','allergies','history','questions'];
 export const LABELS={concern:'Main concern',symptoms:'Reported symptoms',duration:'Onset / duration',severity:'Severity in patient’s words',medicines:'Current medicines',allergies:'Allergies',history:'Reported history',questions:'Patient questions'};
 export const FACT_SCHEMA={type:'object',additionalProperties:false,required:['facts','ambiguities'],properties:{facts:{type:'array',maxItems:24,items:{type:'object',additionalProperties:false,required:['field','quote','sourceId'],properties:{field:{type:'string',enum:FIELDS},quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}},ambiguities:{type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['quote','sourceId'],properties:{quote:{type:'string',minLength:1,maxLength:500},sourceId:{type:'string',enum:['english','clarifications']}}}}}};
+// Expand only contiguous source tokens to their unique, complete source sentence.
+// This changes quotation boundaries, never the patient's words or the field label.
+export function anchorEvidence(result,sources){
+ if(!result||!Array.isArray(result.facts)||!Array.isArray(result.ambiguities))return {result,expansions:0};
+ const tokens=s=>(s.normalize('NFKC').toLowerCase().match(/[\p{L}\p{M}\p{N}]+/gu)||[]).join(' ');
+ let expansions=0;
+ const anchor=f=>{
+  if(!f||typeof f.quote!=='string'||typeof sources[f.sourceId]!=='string')return f;
+  const sentences=sources[f.sourceId].match(/[^.!?।。\n]+[.!?।。]?/g)?.map(s=>s.trim()).filter(Boolean)||[];
+  if(sentences.includes(f.quote))return f;
+  const needle=tokens(f.quote);if(!needle)return f;
+  const matches=sentences.filter(s=>s.length<=500&&(' '+tokens(s)+' ').includes(' '+needle+' '));
+  if(matches.length!==1)return f;
+  expansions++;return {...f,quote:matches[0]};
+ };
+ const dedupe=rows=>[...new Map(rows.map(f=>[JSON.stringify(f),f])).values()];
+ return {result:{...result,facts:dedupe(result.facts.map(anchor)),ambiguities:dedupe(result.ambiguities.map(anchor))},expansions};
+}
 export function validateExtraction(result,sources){
  const errors=[];
  if(!result||typeof result!=='object'||Array.isArray(result)||Object.keys(result).some(k=>!['facts','ambiguities'].includes(k))||!Array.isArray(result.facts)||!Array.isArray(result.ambiguities))return ['Invalid extraction schema'];

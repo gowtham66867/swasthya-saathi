@@ -1,0 +1,1232 @@
+{
+  "status": "complete",
+  "date": "2026-11-17T16:39:25.333Z",
+  "providerCallsInThisRun": 60,
+  "rateLimitRetries": 4,
+  "kind": "live synthetic speech round trip: Bulbul → Saaras → translation → extraction",
+  "models": {
+    "tts": "bulbul:v3",
+    "stt": "saaras:v3",
+    "translation": "sarvam-translate:v1",
+    "extraction": "sarvam-105b"
+  },
+  "summary": {
+    "hi-IN": {
+      "cases": 6,
+      "speechCompleted": 6,
+      "completed": 5,
+      "weightedCER": 0.06951871657754011,
+      "criticalChecksPassed": 7,
+      "criticalChecksTotal": 7,
+      "p95Ms": 3154,
+      "audioSeconds": 13.909342403628116,
+      "ttsCharacters": 240,
+      "translationCharacters": 246,
+      "inputTokens": 7690,
+      "outputTokens": 787
+    },
+    "ta-IN": {
+      "cases": 6,
+      "speechCompleted": 6,
+      "completed": 2,
+      "weightedCER": 0.14383561643835616,
+      "criticalChecksPassed": 6,
+      "criticalChecksTotal": 7,
+      "p95Ms": 7126,
+      "audioSeconds": 19.626621315192743,
+      "ttsCharacters": 338,
+      "translationCharacters": 346,
+      "inputTokens": 8511,
+      "outputTokens": 5110
+    },
+    "te-IN": {
+      "cases": 6,
+      "speechCompleted": 6,
+      "completed": 3,
+      "weightedCER": 0.09210526315789473,
+      "criticalChecksPassed": 7,
+      "criticalChecksTotal": 7,
+      "p95Ms": 3006,
+      "audioSeconds": 18.68798185941043,
+      "ttsCharacters": 274,
+      "translationCharacters": 287,
+      "inputTokens": 8529,
+      "outputTokens": 858
+    },
+    "kn-IN": {
+      "cases": 6,
+      "speechCompleted": 5,
+      "completed": 4,
+      "weightedCER": 0.06930693069306931,
+      "criticalChecksPassed": 5,
+      "criticalChecksTotal": 6,
+      "p95Ms": 18863,
+      "audioSeconds": 18.176054421768704,
+      "ttsCharacters": 272,
+      "translationCharacters": 249,
+      "inputTokens": 5994,
+      "outputTokens": 688
+    }
+  },
+  "estimatedINR": 6.696248333333333,
+  "pricing": "Published pay-as-you-go rates; excludes GST/cloud; no cache discount. Failed-call billing and rounding may differ.",
+  "limitations": [
+    "Machine-generated quiet audio, not human recordings or clinic noise.",
+    "Same-provider synthesis/recognition can bias results upward.",
+    "CER ignores punctuation, spaces and symbols; numerals and word choices can still differ.",
+    "Critical checks are small lexical probes, not semantic or clinical accuracy.",
+    "No fluent-speaker or clinician adjudication."
+  ],
+  "results": [
+    {
+      "id": "hi-IN-headache",
+      "language": "hi-IN",
+      "reference": "मुझे तीन दिनों से सिरदर्द है।",
+      "transcript": "मुझे तीन दिनों से सिर दर्द है।",
+      "translation": "I have had a headache for three days.",
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 23,
+        "rate": 0
+      },
+      "audioSeconds": 1.6213151927437641,
+      "ttsCharacters": 29,
+      "translationCharacters": 30,
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "duration",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 353,
+        "usage": {
+          "input": 832,
+          "output": 74
+        }
+      },
+      "checks": [
+        {
+          "name": "three days preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 2181
+    },
+    {
+      "id": "hi-IN-negation",
+      "language": "hi-IN",
+      "reference": "मुझे खांसी है। मुझे बुखार नहीं है।",
+      "transcript": "मुझे खांसी है, मुझे बुखार नहीं है।",
+      "translation": "I have a cough, but I don't have a fever.",
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 26,
+        "rate": 0
+      },
+      "audioSeconds": 1.9626757369614511,
+      "ttsCharacters": 34,
+      "translationCharacters": 34,
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a cough, but I don't have a fever.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 241,
+        "usage": {
+          "input": 837,
+          "output": 44
+        }
+      },
+      "checks": [
+        {
+          "name": "fever denial",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 2080
+    },
+    {
+      "id": "hi-IN-allergy-denial",
+      "language": "hi-IN",
+      "reference": "मुझे खुजली है। मुझे कोई ज्ञात एलर्जी नहीं है।",
+      "ttsCharacters": 45,
+      "audioSeconds": 2.6453514739229025,
+      "ttsCompleted": true,
+      "transcript": "मुझे खुजली है, मुझे कोई ज्ञात एलर्जी नहीं है।",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 35,
+        "rate": 0
+      },
+      "translationCharacters": 45,
+      "translation": "I have itching, but I don't have any known allergies.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 1027,
+        "usage": {
+          "input": 1741,
+          "output": 231
+        }
+      },
+      "checks": [
+        {
+          "name": "allergy denial",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 3154
+    },
+    {
+      "id": "hi-IN-allergy-reported",
+      "language": "hi-IN",
+      "reference": "मुझे चकत्ते हैं। मुझे पेनिसिलिन से एलर्जी है।",
+      "ttsCharacters": 45,
+      "audioSeconds": 2.56,
+      "ttsCompleted": true,
+      "transcript": "मुझे चककते हैं, मुझे पेनिसिलिन से एलर्जी है।",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 2,
+        "referenceCharacters": 36,
+        "rate": 0.05555555555555555
+      },
+      "translationCharacters": 44,
+      "translation": "I am allergic to glitter, I have a bad reaction to penicillin.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I am allergic to glitter, I have a bad reaction to penicillin.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I am allergic to glitter, I have a bad reaction to penicillin.",
+            "sourceId": "english"
+          },
+          {
+            "field": "allergies",
+            "quote": "I am allergic to glitter, I have a bad reaction to penicillin.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 995,
+        "usage": {
+          "input": 1731,
+          "output": 193
+        }
+      },
+      "checks": [
+        {
+          "name": "penicillin reported",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 2682
+    },
+    {
+      "id": "hi-IN-medication",
+      "language": "hi-IN",
+      "reference": "मुझे थकान है। मैं मेटफॉर्मिन 500 mg दिन में दो बार लेता हूँ।",
+      "transcript": "मुझे थकान है, मैं मेटफॉर्मिन 500 मिलीग्राम दिन में 2 बार लेता हूँ।",
+      "translation": "I am tired, I take metformin 500 mg twice a day.",
+      "cer": {
+        "errors": 11,
+        "referenceCharacters": 46,
+        "rate": 0.2391304347826087
+      },
+      "audioSeconds": 3.84,
+      "ttsCharacters": 60,
+      "translationCharacters": 66,
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I am tired, I take metformin 500 mg twice a day.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I am tired, I take metformin 500 mg twice a day.",
+            "sourceId": "english"
+          },
+          {
+            "field": "medicines",
+            "quote": "I am tired, I take metformin 500 mg twice a day.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 1172,
+        "usage": {
+          "input": 1719,
+          "output": 193
+        }
+      },
+      "checks": [
+        {
+          "name": "500 mg preserved",
+          "pass": true
+        },
+        {
+          "name": "metformin preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 3015
+    },
+    {
+      "id": "hi-IN-vague",
+      "language": "hi-IN",
+      "reference": "मेरे पेट में थोड़ा दर्द है।",
+      "transcript": "मेरे पेट में थोड़ा दर्द है।",
+      "translation": "I have a slight stomach ache.",
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 21,
+        "rate": 0
+      },
+      "audioSeconds": 1.28,
+      "ttsCharacters": 27,
+      "translationCharacters": 27,
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a slight stomach ache.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have a slight stomach ache.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 279,
+        "usage": {
+          "input": 830,
+          "output": 52
+        }
+      },
+      "checks": [
+        {
+          "name": "vague severity preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 1403
+    },
+    {
+      "id": "ta-IN-headache",
+      "language": "ta-IN",
+      "reference": "எனக்கு மூன்று நாட்களாக தலைவலி இருக்கிறது।",
+      "transcript": "எனக்கு மூன்று நாட்களாக தலைவலி இருக்கிறது.",
+      "translation": "I have had a headache for three days.",
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 36,
+        "rate": 0
+      },
+      "audioSeconds": 2.4746485260770976,
+      "ttsCharacters": 41,
+      "translationCharacters": 41,
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 227,
+        "usage": {
+          "input": 832,
+          "output": 54
+        }
+      },
+      "checks": [
+        {
+          "name": "three days preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 1622
+    },
+    {
+      "id": "ta-IN-negation",
+      "language": "ta-IN",
+      "reference": "எனக்கு இருமல் இருக்கிறது. எனக்கு காய்ச்சல் இல்லை.",
+      "ttsCharacters": 49,
+      "audioSeconds": 2.730657596371882,
+      "ttsCompleted": true,
+      "transcript": "எனக்கு இருமல் இருக்கிறது, எனக்கு காய்ச்சல் இல்லை.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 42,
+        "rate": 0
+      },
+      "translationCharacters": 49,
+      "translation": "I have a cough, but I don't have a fever.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 3241,
+        "usage": {
+          "input": 1709,
+          "output": 2290
+        }
+      },
+      "checks": [
+        {
+          "name": "fever denial",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 5150
+    },
+    {
+      "id": "ta-IN-allergy-denial",
+      "language": "ta-IN",
+      "reference": "எனக்கு அரிப்பு இருக்கிறது. எனக்குத் தெரிந்த ஒவ்வாமை எதுவும் இல்லை.",
+      "ttsCharacters": 66,
+      "audioSeconds": 4.181315192743764,
+      "ttsCompleted": true,
+      "transcript": "எனக்கு அரிப்பு இருக்கிறது, எனக்கு தெரிந்த ஒவ்வாமை எதுவும் இல்லை.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 2,
+        "referenceCharacters": 57,
+        "rate": 0.03508771929824561
+      },
+      "translationCharacters": 64,
+      "translation": "I have itching, and I don't have any known allergies.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 4347,
+        "usage": {
+          "input": 1709,
+          "output": 2287
+        }
+      },
+      "checks": [
+        {
+          "name": "allergy denial",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 7126
+    },
+    {
+      "id": "ta-IN-allergy-reported",
+      "language": "ta-IN",
+      "reference": "எனக்குத் தோல் தடிப்பு உள்ளது. எனக்கு பெனிசிலின் ஒவ்வாமை உள்ளது.",
+      "ttsCharacters": 63,
+      "audioSeconds": 3.498684807256236,
+      "ttsCompleted": true,
+      "transcript": "எனக்கு தோல் தடிப்பு உள்ளது, எனக்கு பெனிசிலின் ஒவ்வாமை உள்ளது.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 2,
+        "referenceCharacters": 54,
+        "rate": 0.037037037037037035
+      },
+      "translationCharacters": 61,
+      "translation": "I have a rash, and I am allergic to penicillin.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 740,
+        "usage": {
+          "input": 1711,
+          "output": 178
+        }
+      },
+      "checks": [
+        {
+          "name": "penicillin reported",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 2835
+    },
+    {
+      "id": "ta-IN-medication",
+      "language": "ta-IN",
+      "reference": "எனக்குச் சோர்வாக உள்ளது. நான் metformin 500 mg தினமும் இரண்டு முறை எடுத்துக்கொள்கிறேன்.",
+      "ttsCharacters": 87,
+      "audioSeconds": 5.034648526077097,
+      "ttsCompleted": true,
+      "transcript": "எனக்கு சோர்வாக உள்ளது, நான் மெட்ஃபார்மின் ஐந்நூறு மில்லிகிராம் தினமும் இரண்டு முறை எடுக்கொள்கிறேன்.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 38,
+        "referenceCharacters": 75,
+        "rate": 0.5066666666666667
+      },
+      "translationCharacters": 99,
+      "translation": "I feel tired, and I take metformin 500 milligrams twice a day.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 609,
+        "usage": {
+          "input": 1721,
+          "output": 254
+        }
+      },
+      "checks": [
+        {
+          "name": "500 mg preserved",
+          "pass": true
+        },
+        {
+          "name": "metformin preserved",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 3626
+    },
+    {
+      "id": "ta-IN-vague",
+      "language": "ta-IN",
+      "reference": "எனக்கு வயிறு கொஞ்சம் வலிக்கிறது.",
+      "ttsCharacters": 32,
+      "audioSeconds": 1.7066666666666668,
+      "ttsCompleted": true,
+      "transcript": "எனக்கு வயிறு கொஞ்சம் வலிக்கிறது.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 28,
+        "rate": 0
+      },
+      "translationCharacters": 32,
+      "translation": "My stomach hurts a bit.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "My stomach hurts a bit.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "My stomach hurts a bit.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 217,
+        "usage": {
+          "input": 829,
+          "output": 47
+        }
+      },
+      "checks": [
+        {
+          "name": "vague severity preserved",
+          "pass": false
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 1658
+    },
+    {
+      "id": "te-IN-headache",
+      "language": "te-IN",
+      "reference": "నాకు మూడు రోజులుగా తలనొప్పి ఉంది.",
+      "ttsCharacters": 33,
+      "audioSeconds": 2.3039909297052152,
+      "ttsCompleted": true,
+      "transcript": "నాకు మూడు రోజులుగా తలనొప్పి ఉంది.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 28,
+        "rate": 0
+      },
+      "translationCharacters": 33,
+      "translation": "I have had a headache for three days.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "duration",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 439,
+        "usage": {
+          "input": 832,
+          "output": 74
+        }
+      },
+      "checks": [
+        {
+          "name": "three days preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 2180
+    },
+    {
+      "id": "te-IN-negation",
+      "language": "te-IN",
+      "reference": "నాకు దగ్గు ఉంది. నాకు జ్వరం లేదు.",
+      "ttsCharacters": 33,
+      "audioSeconds": 2.389342403628118,
+      "ttsCompleted": true,
+      "transcript": "నాకు దగ్గు ఉంది, నాకు జ్వరం లేదు.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 26,
+        "rate": 0
+      },
+      "translationCharacters": 33,
+      "translation": "I have a cough, but I don't have a fever.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 514,
+        "usage": {
+          "input": 1721,
+          "output": 147
+        }
+      },
+      "checks": [
+        {
+          "name": "fever denial",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 2159
+    },
+    {
+      "id": "te-IN-allergy-denial",
+      "language": "te-IN",
+      "reference": "నాకు దురద ఉంది. నాకు తెలిసిన అలెర్జీలు ఏవీ లేవు.",
+      "ttsCharacters": 48,
+      "audioSeconds": 3.242675736961451,
+      "ttsCompleted": true,
+      "transcript": "నాకు దురద ఉంది, నాకు తెలిసిన అలర్జీలు ఏవీ లేవు.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 1,
+        "referenceCharacters": 39,
+        "rate": 0.02564102564102564
+      },
+      "translationCharacters": 47,
+      "translation": "I have itching, and I don't have any known allergies.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 583,
+        "usage": {
+          "input": 1715,
+          "output": 194
+        }
+      },
+      "checks": [
+        {
+          "name": "allergy denial",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 2388
+    },
+    {
+      "id": "te-IN-allergy-reported",
+      "language": "te-IN",
+      "reference": "నాకు దద్దుర్లు వచ్చాయి. నాకు పెనిసిలిన్ అలెర్జీ ఉంది.",
+      "ttsCharacters": 53,
+      "audioSeconds": 3.4133333333333336,
+      "ttsCompleted": true,
+      "transcript": "నాకు దద్దుర్లు వచ్చాయి, నాకు పెనిసిలిన్ అలర్జీ ఉంది.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 1,
+        "referenceCharacters": 45,
+        "rate": 0.022222222222222223
+      },
+      "translationCharacters": 52,
+      "translation": "I have a rash, and I am allergic to penicillin.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 634,
+        "usage": {
+          "input": 1711,
+          "output": 156
+        }
+      },
+      "checks": [
+        {
+          "name": "penicillin reported",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 2943
+    },
+    {
+      "id": "te-IN-medication",
+      "language": "te-IN",
+      "reference": "నాకు అలసటగా ఉంది. నేను రోజుకు రెండు సార్లు మెట్ఫార్మిన్ 500 mg తీసుకుంటాను.",
+      "ttsCharacters": 75,
+      "audioSeconds": 5.290657596371882,
+      "ttsCompleted": true,
+      "transcript": "నాకు అలసటగా ఉంది, నేను రోజుకు రెండు సార్లు మెట్ఫార్మిన్ ఐదు వందల మిల్లీగ్రామ్ తీసుకుంటాను.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 19,
+        "referenceCharacters": 63,
+        "rate": 0.30158730158730157
+      },
+      "translationCharacters": 90,
+      "translation": "I feel tired, so I take metformin 500 milligrams twice a day.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I feel tired, so I take metformin 500 milligrams twice a day.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I feel tired, so I take metformin 500 milligrams twice a day.",
+            "sourceId": "english"
+          },
+          {
+            "field": "medicines",
+            "quote": "I feel tired, so I take metformin 500 milligrams twice a day.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 644,
+        "usage": {
+          "input": 1721,
+          "output": 195
+        }
+      },
+      "checks": [
+        {
+          "name": "500 mg preserved",
+          "pass": true
+        },
+        {
+          "name": "metformin preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 3006
+    },
+    {
+      "id": "te-IN-vague",
+      "language": "te-IN",
+      "reference": "నా కడుపు కొద్దిగా నొప్పిగా ఉంది.",
+      "ttsCharacters": 32,
+      "audioSeconds": 2.047981859410431,
+      "ttsCompleted": true,
+      "transcript": "నా కడుపు కొద్దిగా నొప్పిగా ఉంది.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 27,
+        "rate": 0
+      },
+      "translationCharacters": 32,
+      "translation": "My stomach hurts a little.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "My stomach hurts a little.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "My stomach hurts a little.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 346,
+        "usage": {
+          "input": 829,
+          "output": 92
+        }
+      },
+      "checks": [
+        {
+          "name": "vague severity preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 2132
+    },
+    {
+      "id": "kn-IN-headache",
+      "language": "kn-IN",
+      "reference": "ನನಗೆ ಮೂರು ದಿನಗಳಿಂದ ತಲೆನೋವು ಇದೆ.",
+      "ttsCharacters": 31,
+      "audioSeconds": 2.2186848072562357,
+      "ttsCompleted": true,
+      "transcript": "ನನಗೆ ಮೂರು ದಿನಗಳಿಂದ ತಲೆನೋವು ಇದೆ.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 26,
+        "rate": 0
+      },
+      "translationCharacters": 31,
+      "translation": "I have had a headache for three days.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          },
+          {
+            "field": "duration",
+            "quote": "I have had a headache for three days.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 238,
+        "usage": {
+          "input": 832,
+          "output": 74
+        }
+      },
+      "checks": [
+        {
+          "name": "three days preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 1788
+    },
+    {
+      "id": "kn-IN-negation",
+      "language": "kn-IN",
+      "reference": "ನನಗೆ ಕೆಮ್ಮು ಇದೆ. ನನಗೆ ಜ್ವರ ಇಲ್ಲ.",
+      "ttsCharacters": 32,
+      "audioSeconds": 2.389342403628118,
+      "ttsCompleted": true,
+      "error": "speech-to-text provider 429",
+      "completed": false,
+      "elapsedMs": 16959
+    },
+    {
+      "id": "kn-IN-allergy-denial",
+      "language": "kn-IN",
+      "reference": "ನನಗೆ ತುರಿಕೆ ಇದೆ. ನನಗೆ ತಿಳಿದಿರುವ ಯಾವುದೇ ಅಲರ್ಜಿ ಇಲ್ಲ.",
+      "ttsCharacters": 51,
+      "audioSeconds": 3.242675736961451,
+      "ttsCompleted": true,
+      "transcript": "ನನಗೆ ತುರಿಕೆ ಇದೆ, ನನಗೆ ತಿಳಿದಿರುವ ಯಾವುದೇ ಅಲರ್ಜಿ ಇಲ್ಲ.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 42,
+        "rate": 0
+      },
+      "translationCharacters": 51,
+      "translation": "I have itching, but I don't have any allergies that I know of.",
+      "speechCompleted": true,
+      "extractionError": "validation",
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 621,
+        "usage": {
+          "input": 1731,
+          "output": 265
+        }
+      },
+      "checks": [
+        {
+          "name": "allergy denial",
+          "pass": true
+        }
+      ],
+      "completed": false,
+      "elapsedMs": 18863
+    },
+    {
+      "id": "kn-IN-allergy-reported",
+      "language": "kn-IN",
+      "reference": "ನನಗೆ ಚರ್ಮದ ದದ್ದು ಇದೆ. ನನಗೆ ಪೆನಿಸಿಲಿನ್ ಅಲರ್ಜಿ ಇದೆ.",
+      "ttsCharacters": 49,
+      "audioSeconds": 3.498684807256236,
+      "ttsCompleted": true,
+      "transcript": "ನನಗೆ ಚರ್ಮದ ದದ್ದು ಇದೆ. ನನಗೆ ಪೆನಿಸಿಲಿನ್ ಅಲರ್ಜಿ ಇದೆ.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 40,
+        "rate": 0
+      },
+      "translationCharacters": 49,
+      "translation": "I have a skin rash. I am allergic to penicillin.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a skin rash.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have a skin rash.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I am allergic to penicillin.",
+            "sourceId": "english"
+          },
+          {
+            "field": "allergies",
+            "quote": "I am allergic to penicillin.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 245,
+        "usage": {
+          "input": 835,
+          "output": 85
+        }
+      },
+      "checks": [
+        {
+          "name": "penicillin reported",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 2231
+    },
+    {
+      "id": "kn-IN-medication",
+      "language": "kn-IN",
+      "reference": "ನನಗೆ ಸುಸ್ತಾಗಿದೆ. ನಾನು ದಿನಕ್ಕೆ ಎರಡು ಬಾರಿ ಮೆಟ್ಫಾರ್ಮಿನ್ 500 mg ತೆಗೆದುಕೊಳ್ಳುತ್ತೇನೆ.",
+      "ttsCharacters": 79,
+      "audioSeconds": 4.6079818594104305,
+      "ttsCompleted": true,
+      "transcript": "ನನಗೆ ಸುಸ್ತಾಗಿದೆ, ನಾನು ದಿನಕ್ಕೆ ಎರಡು ಬಾರಿ ಮೆಟ್ಫಾರ್ಮಿನ್ ಐನೂರು ಮಿಲಿಗ್ರಾಂ ತೆಗೆದುಕೊಳ್ಳುತ್ತೇನೆ.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 14,
+        "referenceCharacters": 68,
+        "rate": 0.20588235294117646
+      },
+      "translationCharacters": 88,
+      "translation": "I am tired, I take metformin 500 mg twice a day.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I am tired, I take metformin 500 mg twice a day.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I am tired, I take metformin 500 mg twice a day.",
+            "sourceId": "english"
+          },
+          {
+            "field": "medicines",
+            "quote": "I am tired, I take metformin 500 mg twice a day.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 591,
+        "usage": {
+          "input": 1767,
+          "output": 217
+        }
+      },
+      "checks": [
+        {
+          "name": "500 mg preserved",
+          "pass": true
+        },
+        {
+          "name": "metformin preserved",
+          "pass": true
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 3481
+    },
+    {
+      "id": "kn-IN-vague",
+      "language": "kn-IN",
+      "reference": "ನನ್ನ ಹೊಟ್ಟೆ ಸ್ವಲ್ಪ ನೋಯುತ್ತಿದೆ.",
+      "ttsCharacters": 30,
+      "audioSeconds": 2.2186848072562357,
+      "ttsCompleted": true,
+      "transcript": "ನನ್ನ ಹೊಟ್ಟೆ ಸ್ವಲ್ಪ ನೋಯುತ್ತಿದೆ.",
+      "sttCompleted": true,
+      "cer": {
+        "errors": 0,
+        "referenceCharacters": 26,
+        "rate": 0
+      },
+      "translationCharacters": 30,
+      "translation": "My stomach hurts a bit.",
+      "speechCompleted": true,
+      "extraction": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "My stomach hurts a bit.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "My stomach hurts a bit.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v2.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 209,
+        "usage": {
+          "input": 829,
+          "output": 47
+        }
+      },
+      "checks": [
+        {
+          "name": "vague severity preserved",
+          "pass": false
+        }
+      ],
+      "completed": true,
+      "elapsedMs": 1694
+    }
+  ]
+}

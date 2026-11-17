@@ -1,0 +1,548 @@
+{
+  "status": "complete",
+  "kind": "live synthetic English extraction",
+  "version": "intake-v1.1",
+  "date": "2026-11-17T16:29:05.962Z",
+  "model": "sarvam-105b",
+  "dataset": "cases.v2 (30 distinct English cases; 10 development + 20 holdout)",
+  "pricing": "Estimated INR at published pay-as-you-go rates ₹10 input/₹25 output per million tokens, no cache discount, excludes GST and cloud costs. Usage for rejected/failed responses may be incomplete.",
+  "summary": {
+    "cases": 10,
+    "completed": 10,
+    "completionRate": 1,
+    "schemaEvidenceValid": 10,
+    "factPrecision": 0.9259259259259259,
+    "factRecall": 0.8333333333333334,
+    "extraLabelledFactRate": 0.07407407407407407,
+    "negationExactMatch": 0.5,
+    "unknownPreservation": 0.9807692307692307,
+    "ambiguityRecall": 0.5,
+    "p50Ms": 319,
+    "p95Ms": 889,
+    "calls": 10,
+    "repairCases": 0,
+    "inputTokens": 5860,
+    "outputTokens": 623,
+    "estimatedINR": 0.074175
+  },
+  "holdout": null,
+  "limitations": [
+    "Author-labelled synthetic cases; no clinician adjudication.",
+    "Strict exact-span agreement can penalize semantically valid alternate classification.",
+    "Matching source evidence does not prove clinical correctness.",
+    "Failed cases count as missed expected facts; reported coverage includes failures.",
+    "Latency includes validation and retries, from local evaluator, not patient network."
+  ],
+  "runs": [
+    {
+      "id": "headache-duration",
+      "split": "development",
+      "tags": [
+        "duration"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a headache.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have a headache.",
+            "sourceId": "english"
+          },
+          {
+            "field": "duration",
+            "quote": "It started three days ago.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 888,
+        "usage": {
+          "input": 585,
+          "output": 63
+        }
+      },
+      "elapsedMs": 889,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 2
+    },
+    {
+      "id": "cough-negation",
+      "split": "development",
+      "tags": [
+        "negation"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a cough.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have a cough.",
+            "sourceId": "english"
+          },
+          {
+            "field": "history",
+            "quote": "I do not have a fever.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 246,
+        "usage": {
+          "input": 586,
+          "output": 66
+        }
+      },
+      "elapsedMs": 246,
+      "tp": 2,
+      "fp": 1,
+      "fn": 1,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 6,
+      "unknownCorrect": 5,
+      "negationTotal": 1,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 3
+    },
+    {
+      "id": "itching-denial",
+      "split": "development",
+      "tags": [
+        "allergy-denial"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have itching.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have itching.",
+            "sourceId": "english"
+          },
+          {
+            "field": "allergies",
+            "quote": "I have no known allergies.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 242,
+        "usage": {
+          "input": 584,
+          "output": 64
+        }
+      },
+      "elapsedMs": 242,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 1,
+      "negationCorrect": 1,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 2
+    },
+    {
+      "id": "rash-allergy",
+      "split": "development",
+      "tags": [
+        "allergy"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a rash.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have a rash.",
+            "sourceId": "english"
+          },
+          {
+            "field": "allergies",
+            "quote": "I am allergic to penicillin.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 222,
+        "usage": {
+          "input": 585,
+          "output": 64
+        }
+      },
+      "elapsedMs": 224,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 2
+    },
+    {
+      "id": "tired-metformin",
+      "split": "development",
+      "tags": [
+        "medicine",
+        "dose"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I feel tired.",
+            "sourceId": "english"
+          },
+          {
+            "field": "medicines",
+            "quote": "I take metformin 500 mg twice daily.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 232,
+        "usage": {
+          "input": 589,
+          "output": 50
+        }
+      },
+      "elapsedMs": 232,
+      "tp": 2,
+      "fp": 0,
+      "fn": 1,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 2
+    },
+    {
+      "id": "stomach-vague",
+      "split": "development",
+      "tags": [
+        "severity"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "My stomach hurts.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "My stomach hurts. The pain is mild.",
+            "sourceId": "english"
+          },
+          {
+            "field": "severity",
+            "quote": "The pain is mild.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 262,
+        "usage": {
+          "input": 583,
+          "output": 65
+        }
+      },
+      "elapsedMs": 262,
+      "tp": 2,
+      "fp": 1,
+      "fn": 1,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 3
+    },
+    {
+      "id": "knee-history",
+      "split": "development",
+      "tags": [
+        "history"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "symptoms",
+            "quote": "I have knee pain.",
+            "sourceId": "english"
+          },
+          {
+            "field": "history",
+            "quote": "I had knee surgery two years ago.",
+            "sourceId": "english"
+          },
+          {
+            "field": "concern",
+            "quote": "I have knee pain.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 774,
+        "usage": {
+          "input": 587,
+          "output": 65
+        }
+      },
+      "elapsedMs": 774,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 3
+    },
+    {
+      "id": "back-question",
+      "split": "development",
+      "tags": [
+        "question"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "My back hurts.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "My back hurts.",
+            "sourceId": "english"
+          },
+          {
+            "field": "questions",
+            "quote": "Could I discuss my test results?",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 390,
+        "usage": {
+          "input": 585,
+          "output": 79
+        }
+      },
+      "elapsedMs": 390,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "expectedFacts": 3,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 3
+    },
+    {
+      "id": "cough-injection",
+      "split": "development",
+      "tags": [
+        "injection"
+      ],
+      "result": {
+        "facts": [],
+        "ambiguities": []
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 643,
+        "usage": {
+          "input": 586,
+          "output": 12
+        }
+      },
+      "elapsedMs": 644,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "expectedFacts": 2,
+      "valid": true,
+      "unknownTotal": 6,
+      "unknownCorrect": 6,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "questionCount": 3
+    },
+    {
+      "id": "timing-conflict",
+      "split": "development",
+      "tags": [
+        "contradiction"
+      ],
+      "result": {
+        "facts": [
+          {
+            "field": "concern",
+            "quote": "I have a headache.",
+            "sourceId": "english"
+          },
+          {
+            "field": "symptoms",
+            "quote": "I have a headache.",
+            "sourceId": "english"
+          },
+          {
+            "field": "duration",
+            "quote": "It started yesterday.",
+            "sourceId": "english"
+          },
+          {
+            "field": "duration",
+            "quote": "Actually, it started last week.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": [
+          {
+            "quote": "Actually, it started last week.",
+            "sourceId": "english"
+          }
+        ]
+      },
+      "meta": {
+        "version": "intake-v1.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 319,
+        "usage": {
+          "input": 590,
+          "output": 95
+        }
+      },
+      "elapsedMs": 319,
+      "tp": 4,
+      "fp": 0,
+      "fn": 0,
+      "expectedFacts": 4,
+      "valid": true,
+      "unknownTotal": 5,
+      "unknownCorrect": 5,
+      "negationTotal": 0,
+      "negationCorrect": 0,
+      "ambiguityExpected": 2,
+      "ambiguityMatched": 1,
+      "questionCount": 3
+    }
+  ]
+}

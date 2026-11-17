@@ -1,3 +1,4 @@
+import {applyReviewRules} from './review-tools.js';
 import {VERSION} from './agent.js';
 import {runExtraction} from './harness.mjs';
 const languages=new Set(['hi-IN','ta-IN','te-IN','kn-IN','ml-IN','mr-IN','bn-IN','gu-IN','pa-IN','od-IN','en-IN']);
@@ -19,7 +20,7 @@ export async function handleApi(request,env){
   const parsed=new Request(request.url,{method:'POST',headers:request.headers,body});
   if(path==='/api/extract'){
    const data=await parsed.json();if(!['translated','clarifying'].includes(data.stage))return json({error:'Extract only after translation or during clarification.'},409);
-   const output=await runExtraction({english:data.text,clarifications:data.clarifications||''},{key:env.SARVAM_API_KEY,model:env.SARVAM_TEXT_MODEL||'sarvam-105b',signal:request.signal});return json(output);
+   const output=await runExtraction({english:data.text,clarifications:data.clarifications||''},{key:env.SARVAM_API_KEY,model:env.SARVAM_TEXT_MODEL||'sarvam-105b',signal:request.signal});return json({...output,...applyReviewRules(output.result,{english:data.text,clarifications:data.clarifications||''})});
   }
   let endpoint,payload,headers={'api-subscription-key':env.SARVAM_API_KEY};
   if(path==='/api/transcribe'){

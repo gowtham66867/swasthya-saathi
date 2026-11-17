@@ -49,3 +49,12 @@ At most three model calls per extraction, one optional clarification pass, 2200 
 ## Validation limits
 
 Thirty fixtures cover ten scenarios translated into three language pairs. Offline replay cannot validate model performance. Live text extraction, translation and speech evaluations are separate future measurements. Browser tests exercise the sample workflow and invalidation; provider tests use mocks until keys are configured.
+
+
+## Review and localization additions
+
+`locale.js` supplies five patient locales; `review-tools.js` owns transparent, deterministic review flags and comparable timing calculations. English clinician review includes original clarification answers and their separately translated source. A reviewer reference, critical-detail check and explicit approval gate exports. Manual fallback has no extracted facts until an operator records corrections.
+
+The extraction harness anchors a proposed contiguous token sequence to a unique full source sentence before validation. This preserves negation, qualifiers and dose numbers in the original sentence without accepting paraphrases. Anchoring cannot establish the correctness of the assigned category. Review rules reject instruction-like sentences and flag selected explicit corrections and uncertainty; they are not a clinical reasoning agent.
+
+`evals/benchmark.mjs` separates development, frozen holdout and later regression retests. `evals/speech-live.mjs` measures four languages with synthetic audio and bounded provider retries. Published evidence keeps failures visible, labels reused translations in rechecks, and distinguishes estimates from actual credit debits. A prepared human-validation protocol is in `validation-kit.md`.

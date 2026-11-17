@@ -7,6 +7,9 @@
     "test": "node --test tests/*.test.mjs",
     "dev": "node scripts/dev.mjs",
     "eval": "node evals/run.mjs",
-    "eval:live": "node evals/run.mjs --live"
+    "eval:live": "node evals/run.mjs --live",
+    "evidence": "node scripts/publish-evidence.mjs",
+    "eval:text:live": "node evals/benchmark.mjs",
+    "eval:speech:live": "node evals/speech-live.mjs"
   }
 }

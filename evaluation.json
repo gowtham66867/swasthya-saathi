@@ -1,0 +1,177 @@
+{
+  "generatedAt": "2026-11-17T16:42:52.747Z",
+  "study": "Author-labelled synthetic data; no clinician or fluent-speaker adjudication",
+  "baseline": {
+    "cases": 10,
+    "completed": 10,
+    "completionRate": 1,
+    "schemaEvidenceValid": 10,
+    "factPrecision": 0.9259259259259259,
+    "factRecall": 0.8333333333333334,
+    "extraLabelledFactRate": 0.07407407407407407,
+    "negationExactMatch": 0.5,
+    "unknownPreservation": 0.9807692307692307,
+    "ambiguityRecall": 0.5,
+    "p50Ms": 319,
+    "p95Ms": 889,
+    "calls": 10,
+    "repairCases": 0,
+    "inputTokens": 5860,
+    "outputTokens": 623,
+    "estimatedINR": 0.074175
+  },
+  "text": {
+    "version": "intake-v2",
+    "summary": {
+      "cases": 30,
+      "completed": 30,
+      "completionRate": 1,
+      "schemaEvidenceValid": 30,
+      "factPrecision": 0.8482142857142857,
+      "factRecall": 0.9405940594059405,
+      "extraLabelledFactRate": 0.15178571428571427,
+      "negationExactMatch": 0.9285714285714286,
+      "unknownPreservation": 0.9931972789115646,
+      "ambiguityRecall": 0,
+      "p50Ms": 335,
+      "p95Ms": 805,
+      "calls": 33,
+      "repairCases": 3,
+      "inputTokens": 27742,
+      "outputTokens": 3151,
+      "estimatedINR": 0.356195
+    },
+    "holdout": {
+      "cases": 20,
+      "completed": 20,
+      "completionRate": 1,
+      "schemaEvidenceValid": 20,
+      "factPrecision": 0.868421052631579,
+      "factRecall": 0.9295774647887324,
+      "extraLabelledFactRate": 0.13157894736842105,
+      "negationExactMatch": 0.9166666666666666,
+      "unknownPreservation": 0.9894736842105263,
+      "ambiguityRecall": 0,
+      "p50Ms": 369,
+      "p95Ms": 805,
+      "calls": 23,
+      "repairCases": 3,
+      "inputTokens": 19392,
+      "outputTokens": 2290,
+      "estimatedINR": 0.25117
+    },
+    "development": {
+      "cases": 10,
+      "factRecall": 0.9666666666666667,
+      "factPrecision": 0.8055555555555556
+    },
+    "limitations": [
+      "Author-labelled synthetic cases; no clinician adjudication.",
+      "Strict exact-span agreement can penalize semantically valid alternate classification.",
+      "Matching source evidence does not prove clinical correctness.",
+      "Failed cases count as missed expected facts; reported coverage includes failures.",
+      "Latency includes validation and retries, from local evaluator, not patient network."
+    ]
+  },
+  "speech": {
+    "summary": {
+      "hi-IN": {
+        "cases": 6,
+        "speechCompleted": 6,
+        "completed": 5,
+        "weightedCER": 0.06951871657754011,
+        "criticalChecksPassed": 7,
+        "criticalChecksTotal": 7,
+        "p95Ms": 4126,
+        "audioSeconds": 13.909342403628116,
+        "ttsCharacters": 240,
+        "translationCharacters": 246,
+        "inputTokens": 7658,
+        "outputTokens": 731
+      },
+      "ta-IN": {
+        "cases": 6,
+        "speechCompleted": 6,
+        "completed": 5,
+        "weightedCER": 0.14383561643835616,
+        "criticalChecksPassed": 6,
+        "criticalChecksTotal": 7,
+        "p95Ms": 7749,
+        "audioSeconds": 19.626621315192743,
+        "ttsCharacters": 338,
+        "translationCharacters": 346,
+        "inputTokens": 6778,
+        "outputTokens": 727
+      },
+      "te-IN": {
+        "cases": 6,
+        "speechCompleted": 6,
+        "completed": 6,
+        "weightedCER": 0.09210526315789473,
+        "criticalChecksPassed": 7,
+        "criticalChecksTotal": 7,
+        "p95Ms": 3542,
+        "audioSeconds": 18.68798185941043,
+        "ttsCharacters": 274,
+        "translationCharacters": 287,
+        "inputTokens": 6775,
+        "outputTokens": 773
+      },
+      "kn-IN": {
+        "cases": 6,
+        "speechCompleted": 6,
+        "completed": 6,
+        "weightedCER": 0.06167400881057269,
+        "criticalChecksPassed": 6,
+        "criticalChecksTotal": 7,
+        "p95Ms": 19517,
+        "audioSeconds": 18.602721088435374,
+        "ttsCharacters": 272,
+        "translationCharacters": 281,
+        "inputTokens": 7699,
+        "outputTokens": 2909
+      }
+    },
+    "estimatedINR": 6.688017777777778,
+    "limitations": [
+      "Machine-generated quiet audio, not human recordings or clinic noise.",
+      "Same-provider synthesis/recognition can bias results upward.",
+      "CER ignores punctuation, spaces and symbols; numerals and word choices can still differ.",
+      "Critical checks are small lexical probes, not semantic or clinical accuracy.",
+      "No fluent-speaker or clinician adjudication.",
+      "Successful earlier rows retained; failed extraction rechecks reused saved translations. Latency sums original attempt and recheck where applicable; it is not a fresh end-to-end benchmark."
+    ]
+  },
+  "regression": {
+    "version": "intake-v2.2",
+    "summary": {
+      "cases": 30,
+      "completed": 30,
+      "completionRate": 1,
+      "schemaEvidenceValid": 30,
+      "factPrecision": 0.8796296296296297,
+      "factRecall": 0.9405940594059405,
+      "extraLabelledFactRate": 0.12037037037037036,
+      "negationExactMatch": 0.8571428571428571,
+      "unknownPreservation": 1,
+      "ambiguityRecall": 0.75,
+      "p50Ms": 292,
+      "p95Ms": 486,
+      "calls": 30,
+      "repairCases": 0,
+      "inputTokens": 25161,
+      "outputTokens": 2597,
+      "estimatedINR": 0.316535
+    },
+    "limitations": [
+      "Author-labelled synthetic cases; no clinician adjudication.",
+      "Strict exact-span agreement can penalize semantically valid alternate classification.",
+      "Matching source evidence does not prove clinical correctness.",
+      "Failed cases count as missed expected facts; reported coverage includes failures.",
+      "Latency includes validation and retries, from local evaluator, not patient network."
+    ]
+  },
+  "manualTimeSavings": null,
+  "clinicianValidation": false,
+  "source": "https://github.com/gowtham66867/swasthya-saathi/tree/main/evals/results"
+}

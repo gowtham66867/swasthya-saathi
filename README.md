@@ -5,7 +5,7 @@ Multilingual patient intake with Sarvam voice, a bounded extraction harness, exa
 - App: https://swasthya-saathi-935048564575.asia-south1.run.app
 - Source: https://github.com/gowtham66867/swasthya-saathi (private)
 - Architecture: [docs/architecture.md](docs/architecture.md)
-- Prompt: [prompts/intake-v1.mjs](prompts/intake-v1.mjs)
+- Prompt: [prompts/intake-v2.mjs](prompts/intake-v2.mjs)
 - Schema: [prompts/intake-v1.schema.json](prompts/intake-v1.schema.json)
 
 ## Run
@@ -19,7 +19,7 @@ npm run build
 npm run dev
 ```
 
-Open http://127.0.0.1:4317. Select a language and fictional case, load it, extract the prewritten facts, optionally answer clarification questions, approve review, and export. English, Hindi, and Tamil have ten fictional cases each. Other languages remain selectable for live processing and typed intake. All samples are explicitly prewritten; they are not model demonstrations.
+Open http://127.0.0.1:4317. Select a language and fictional case, load it, extract the prewritten facts, optionally answer clarification questions, approve review, and export. English, Hindi, and Tamil have ten fictional cases each; Telugu and Kannada have six each. All five languages support patient instructions, typed intake, speech capture, question readback and clarification answers. All samples are explicitly prewritten; they are not model demonstrations.
 
 ## Live configuration
 
@@ -47,7 +47,7 @@ EVAL_LIVE=yes npm run eval:live
 
 `evals/cases.v1.json` has 30 author-labelled fictional text cases: ten scenarios each in English, Hindi, and Tamil. Each language version shares its scenario's English translation. Live extraction evaluation therefore measures ten unique English scenarios repeated across language-paired fixtures; it does not measure native-language understanding or translation. Native-language text requires fluent human review.
 
-Offline runs replay expected labels through the validator and grader. Perfect offline matching is fixture consistency, NOT model accuracy. Reports are labelled accordingly. Live runs record actual usage, latency, call count, completion, schema/evidence validity, exact-span fact precision/recall, extra labelled facts, negation matching, and unknown preservation. Failed cases fail the evaluation. Exact matching can penalize equally valid quotes; use human adjudication. Semantic entailment, clarification relevance, clinical terminology, and prompt-injection behavior require live and qualified human evaluation. Speech and translation accuracy need separately labelled audio datasets; no audio scores are claimed.
+Offline runs replay expected labels through the validator and grader. Perfect offline matching is fixture consistency, NOT model accuracy. Reports are labelled accordingly. Live runs record actual usage, latency, call count, completion, schema/evidence validity, exact-span fact precision/recall, extra labelled facts, negation matching, and unknown preservation. Failed cases fail the evaluation. Exact matching can penalize equally valid quotes; use human adjudication. Semantic entailment, clarification relevance, clinical terminology, and prompt-injection behavior require live and qualified human evaluation. A separate 24-case synthetic speech round trip now covers Hindi, Tamil, Telugu and Kannada. These machine-generated quiet recordings are not real-world speech validation.
 
 Tests mock providers and cover repair/retry bounds, injected instructions staying in the data message, no executable model tools, unsupported evidence, negation truncation, state errors, stale revisions, cancellation, approval/export, correction provenance, provider errors, consent, access gates, and size caps. A mocked injection test verifies request construction, not model resistance.
 
@@ -81,3 +81,30 @@ Synthetic prototype for communication support. No diagnosis, prescribing, urgenc
 ## Live smoke test (17 November 2026)
 
 The personal Sarvam account had 2600 available credits before testing. A dedicated app key was created with owner approval and stored in Secret Manager; it was never committed. Live Hindi-to-English translation, generated Hindi speech, and transcription of that generated speech succeeded. The chat endpoint rejected the documentation's `none` reasoning setting; the harness uses `low` and strict `json_schema` output. The corrected extraction returned three valid facts in one call (583 input / 74 output tokens in the direct synthetic test). This is a functional smoke test, not clinical accuracy or a full evaluation. The production access gate remains required. The existing unrelated key was left intact.
+
+
+## Hackathon improvements and language coverage
+
+The focused workflow is assisted primary-care intake. Patient-facing instructions and missing-detail questions are localized in Hindi, Tamil, Telugu, Kannada and English; clinician review remains in English. Clarification answers can be spoken or typed and translated separately, retaining the original. Telugu and Kannada wording is author-written and still requires fluent-speaker review.
+
+The reviewer supplies a reference and self-attested role, checks critical details, then accepts the handoff. JSON export preserves source words, quotes, corrections, review flags and acceptance. Manual review is available when live extraction fails. Acceptance is not clinician authentication or evidence of a clinical study.
+
+`review-tools.js` flags explicit correction wording, uncertainty, family context and instruction-like sentences. These deterministic rules supplement model output; they do not identify every clinical contradiction. `anchorEvidence` expands contiguous source tokens only to a unique complete source sentence, preserving its original wording and negations. It does not accept semantic paraphrases. Final validation still rejects unmatched evidence.
+
+### Reproducible live evidence
+
+- `evals/cases.v2.json`: 30 unique English inputs, frozen 10 development / 20 holdout split.
+- `evals/results/text-live.json`: frozen first post-refinement run, before inspecting holdout failures.
+- `evals/results/text-regression.json`: latest harness on the same seen cases, explicitly not a fresh holdout.
+- `evals/results/speech-live.json`: 24 synthetic speech cases, six per Indian language. Failed extraction rechecks reuse saved translations, with prior attempt metadata retained.
+- `evals/results/speech-before-anchor.json`: speech results before quotation-boundary repair.
+- Public `/evidence.html` and `/evaluation.json`: measured aggregates, costs and limitations; `/demo.html`: two-minute walkthrough.
+
+```sh
+EVAL_LIVE=yes npm run eval:text:live
+EVAL_LIVE=yes npm run eval:speech:live
+npm run evidence
+npm run build
+```
+
+Supply `SARVAM_API_KEY` through the environment or Secret Manager, never source code. Paid evaluation is opt-in. The same-case timing tool reports self-timed observations only and suppresses savings when manual and assisted case IDs differ. No human intake-time benefit has yet been demonstrated. Use [the validation kit](docs/validation-kit.md) for independent review.
