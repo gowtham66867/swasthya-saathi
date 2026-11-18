@@ -1,0 +1,158 @@
+{
+  "approvedINR": 15,
+  "reservedINR": 4.2,
+  "perRequestReserveINR": 0.6,
+  "calls": 7,
+  "maxCalls": 25,
+  "pricingSource": "https://docs.sarvam.ai/api/getting-started/pricing",
+  "pricingChecked": "2026-11-18",
+  "inputAllowanceTokens": 40000,
+  "outputLimitTokens": 2200,
+  "note": "Conservative per-request reservations include failed requests; actual charges are estimated separately from returned usage, not measured from account balance.",
+  "date": "2026-11-18T06:35:35.458Z",
+  "inputTokens": 10282,
+  "outputTokens": 5138,
+  "estimatedINR": 0.23127,
+  "requests": [
+    {
+      "number": 1,
+      "status": 200,
+      "elapsedMs": 3788,
+      "usage": {
+        "completion_tokens": 2200,
+        "prompt_tokens": 1450,
+        "total_tokens": 3650,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2105,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "number": 2,
+      "status": 200,
+      "elapsedMs": 1310,
+      "usage": {
+        "completion_tokens": 118,
+        "prompt_tokens": 1485,
+        "total_tokens": 1603,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1344
+        }
+      }
+    },
+    {
+      "number": 3,
+      "status": 200,
+      "elapsedMs": 412,
+      "usage": {
+        "completion_tokens": 94,
+        "prompt_tokens": 1442,
+        "total_tokens": 1536,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1376
+        }
+      }
+    },
+    {
+      "number": 4,
+      "status": 200,
+      "elapsedMs": 840,
+      "usage": {
+        "completion_tokens": 319,
+        "prompt_tokens": 1462,
+        "total_tokens": 1781,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1376
+        }
+      }
+    },
+    {
+      "number": 5,
+      "status": 200,
+      "elapsedMs": 396,
+      "usage": {
+        "completion_tokens": 132,
+        "prompt_tokens": 1496,
+        "total_tokens": 1628,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1344
+        }
+      }
+    },
+    {
+      "number": 6,
+      "status": 200,
+      "elapsedMs": 343,
+      "usage": {
+        "completion_tokens": 75,
+        "prompt_tokens": 1450,
+        "total_tokens": 1525,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1376
+        }
+      }
+    },
+    {
+      "number": 7,
+      "status": 200,
+      "elapsedMs": 3351,
+      "usage": {
+        "completion_tokens": 2200,
+        "prompt_tokens": 1497,
+        "total_tokens": 3697,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2106,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1344
+        }
+      }
+    }
+  ]
+}

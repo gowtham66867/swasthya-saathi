@@ -1,0 +1,160 @@
+{
+  "status": "aborted",
+  "plannedCases": 16,
+  "version": "intake-v3",
+  "kind": "First frozen v3 synthetic run",
+  "date": "2026-11-18T06:35:35.455Z",
+  "cases": 4,
+  "valid": 3,
+  "limitations": [
+    "Author labels; not clinically adjudicated.",
+    "Native patterns/text await fluent review.",
+    "English references are supplied: this text run does not measure translation.",
+    "Value exact match is token agreement, not clinical accuracy."
+  ],
+  "runs": [
+    {
+      "id": "decimal-dose",
+      "valid": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "valueTargets": 1,
+      "valueExact": 1,
+      "expectedSignalsMatched": 0,
+      "translationFlagsMatched": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "signals": [],
+      "translationFlags": [],
+      "result": {
+        "questions": [],
+        "facts": [
+          {
+            "field": "medicines",
+            "quote": "I take bisoprolol 1.25 mg every morning.",
+            "sourceId": "english",
+            "value": {
+              "name": "bisoprolol",
+              "dose": "1.25",
+              "unit": "mg",
+              "frequency": "every morning"
+            }
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "evidenceExpansions": 0,
+        "version": "intake-v3",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 5123,
+        "usage": {
+          "input": 2935,
+          "output": 2318
+        }
+      }
+    },
+    {
+      "id": "doctor-abbreviation",
+      "valid": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "valueTargets": 0,
+      "valueExact": 0,
+      "expectedSignalsMatched": 0,
+      "translationFlagsMatched": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "signals": [],
+      "translationFlags": [],
+      "result": {
+        "questions": [],
+        "facts": [
+          {
+            "field": "history",
+            "quote": "Dr. Sen said I do not have asthma.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "evidenceExpansions": 0,
+        "version": "intake-v3",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 414,
+        "usage": {
+          "input": 1442,
+          "output": 94
+        }
+      }
+    },
+    {
+      "id": "multiple-decimals",
+      "valid": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "valueTargets": 0,
+      "valueExact": 0,
+      "expectedSignalsMatched": 0,
+      "translationFlagsMatched": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "signals": [],
+      "translationFlags": [],
+      "result": {
+        "questions": [],
+        "facts": [
+          {
+            "field": "medicines",
+            "quote": "I take 0.5 mg in the morning and 0.25 mg at night.",
+            "sourceId": "english"
+          }
+        ],
+        "ambiguities": []
+      },
+      "meta": {
+        "evidenceExpansions": 0,
+        "version": "intake-v3",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 2,
+        "repair": true,
+        "latencyMs": 1240,
+        "usage": {
+          "input": 2958,
+          "output": 451
+        }
+      }
+    },
+    {
+      "id": "time-abbreviation",
+      "error": "validation",
+      "valid": false,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "valueTargets": 0,
+      "valueExact": 0,
+      "expectedSignalsMatched": 0,
+      "translationFlagsMatched": 0,
+      "ambiguityExpected": 0,
+      "ambiguityMatched": 0,
+      "signals": [],
+      "translationFlags": [],
+      "result": {
+        "facts": [],
+        "ambiguities": []
+      }
+    }
+  ]
+}

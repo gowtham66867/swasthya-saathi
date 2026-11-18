@@ -22,7 +22,7 @@ The [two-minute walkthrough](demo.html) follows the same path. Live processing u
 | Exact fact recall on the frozen 20-case holdout | **93.0%** |
 | Exact fact precision on that holdout            | **86.8%** |
 
-These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3**; its paid evaluation and deployment await approval. The public Cloud Run deployment remains v2.2 until then.
+These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3**; its approved first paid holdout stopped after 4/16 cases (3 valid, 1 validation failure). See [the partial-run results](docs/v3-holdout-results.md); deployment remains pending. The public Cloud Run deployment remains v2.2 until then.
 
 ## Architecture
 
@@ -57,7 +57,7 @@ npm run dev
 npx --yes prettier@3.6.2 --check .
 ```
 
-`npm run eval` is free: 30 historical fixture replays plus 16 hash-frozen v3 label/schema checks. The new holdout has not been run against a model or used for tuning. CI runs tests, offline evaluation and build. [Per-phase changes and checks](docs/implementation-phases.md) record each separate commit.
+`npm run eval` is free: 30 historical fixture replays plus 16 hash-frozen v3 label/schema checks. The new holdout was partially run live (4/16 cases) and has not been used for tuning; offline replay is still fixture consistency only. CI runs tests, offline evaluation and build. [Per-phase changes and checks](docs/implementation-phases.md) record each separate commit.
 
 For live processing, supply `SARVAM_API_KEY` and `LIVE_ACCESS_TOKEN` (32+ characters) through environment injection/Secret Manager. `SARVAM_TEXT_MODEL` optionally selects `sarvam-105b-conversations`. Speech uses `saaras:v3`, translation `sarvam-translate:v1` and playback `bulbul:v3`. Enter the app access token in the page's access section; it stays in memory. Local `.env` files are not automatically loaded.
 
@@ -71,7 +71,7 @@ No demo secret, bucket or permissions were created. [Judge-access setup](docs/ju
 
 ## Live evaluation and deployment approval
 
-[The prepared live-run plan](docs/live-run-plan.md) includes commands, expected costs and recording-manifest instructions. No new paid evaluations were run during this implementation. The first v3 holdout is planned at roughly ₹0.5–₹2 with a conservative ₹15 allowance requested before execution; stop on its first failed case for review. Other suites require separate approval.
+[The prepared live-run plan](docs/live-run-plan.md) includes commands, expected costs and recording-manifest instructions. The approved first v3 holdout was attempted on 18 November 2026 and stopped on its first failure; [results](docs/v3-holdout-results.md) are preserved. Seven requests cost an estimated ₹0.23 before GST without cache discounts, below the approved ₹15 allowance. The remaining twelve cases were not run. Other suites require separate approval.
 
 Human-recorded fictional audio can replace synthesized audio through `evals/audio-loader.mjs` and `evals/human-speech.mjs`; no recordings were fabricated. Use the ignored `evals/audio-private/` folder and supply actual reference transcripts plus speaker/upload consent.
 
@@ -80,7 +80,7 @@ Deployment is a separate approval step after evaluated results are reviewed. Bui
 ## Limitations
 
 - Synthetic communication prototype: no diagnosis, prescribing, urgency assessment, EHR integration, clinical validation or regulatory claim.
-- Historical exact-span agreement is not clinical accuracy. Held-out ambiguity quote recall was 0; allergy-category errors affected negation matching. New v3 values, questions and schema compatibility remain untested against the paid provider.
+- Historical exact-span agreement is not clinical accuracy. Held-out ambiguity quote recall was 0; allergy-category errors affected negation matching. The partial v3 run passed three cases and failed one; full-suite values, questions and multilingual behavior remain unverified.
 - Native text/patterns are author-written and await fluent-speaker review. Number/unit/negation checks and back-translation cannot establish semantic equivalence. Confirmation and reviewer roles are self-attested, not authenticated patient/clinician identity.
 - Historical speech results use quiet same-provider synthetic audio. Human speech, accents and clinic noise remain unmeasured. No time-saving benefit has been demonstrated.
 - Workflow state is browser-owned and not server-attested. Shared access tokens are prototype gates, not clinical identity management. Audio duration is not independently decoded server-side; size is enforced. Sarvam processes live content under its own policies; infrastructure may retain request metadata, and local exports/clipboard copies remain with the operator.

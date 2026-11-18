@@ -64,7 +64,7 @@ Optional judge access uses a separate token, expiry and atomic Cloud Storage cou
 
 ## Evaluation
 
-Historical v2/v2.2 results stay unchanged. `npm run eval` replays 30 historical labels and validates a new hash-frozen 16-case v3 holdout offline. The first v3 paid run has not occurred and cannot overwrite its first/partial report. Human-recorded fictional audio is accepted only through a consented manifest; no recordings are bundled. [Failure investigation](implementation-phases.md) and [commands/costs for approval](live-run-plan.md) separate historical evidence, regression and future holdout measurements.
+Historical v2/v2.2 results stay unchanged. `npm run eval` replays 30 historical labels and validates a new hash-frozen 16-case v3 holdout offline. The first v3 paid run stopped after four cases (three valid, one validation failure); its first/partial report cannot be overwritten. See [the results](v3-holdout-results.md). Human-recorded fictional audio is accepted only through a consented manifest; no recordings are bundled. [Failure investigation](implementation-phases.md) and [commands/costs for approval](live-run-plan.md) separate historical evidence, regression and future holdout measurements.
 
 ## Deployment and rollback
 

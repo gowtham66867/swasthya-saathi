@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-18T06:35:35.455Z",
+  "version": "intake-v3",
+  "status": "aborted",
+  "plannedCases": 16,
+  "attempted": 4,
+  "valid": 3,
+  "notRun": 12,
+  "matchedFacts": 3,
+  "extraFacts": 0,
+  "missedFactsOnAttemptedCases": 1,
+  "valueExact": 1,
+  "valueTargets": 1,
+  "calls": 7,
+  "inputTokens": 10282,
+  "outputTokens": 5138,
+  "cachedInputTokens": 8160,
+  "reasoningTokens": 4211,
+  "estimatedINRNoCacheDiscount": 0.23127,
+  "estimatedINRWithReturnedCache": 0.15171,
+  "conservativeReservedINR": 4.2,
+  "approvedINR": 15,
+  "limitHitResponses": 2,
+  "limitations": [
+    "Partial run stopped on first failed case per approved protocol; not a full holdout accuracy score.",
+    "All API responses were HTTP 200. Exact rejected spans and finish reasons were not retained by this evaluator, so failure root cause is unconfirmed.",
+    "Reported cost is a usage-based estimate, excluding GST; it is not an observed account balance debit.",
+    "No prompt/model/runtime tuning, retries of cases, deployment, or GitHub push after observing this holdout."
+  ]
+}

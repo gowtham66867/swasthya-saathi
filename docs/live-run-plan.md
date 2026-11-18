@@ -1,6 +1,6 @@
-# Approval plan — prepared, not executed
+# Live-run plan and approval record
 
-17 November 2026. No new paid calls or deployment were made during intake-v3 work. Existing public evidence describes historical v2/v2.2 results, not the new runtime. Approve live evaluation separately from deployment; stop on schema incompatibility before running the rest of the suite.
+Prepared 17 November 2026. Approved first holdout attempted 18 November 2026: stopped after four cases (three valid, one validation failure), seven calls, estimated ₹0.23 before GST. [Results](v3-holdout-results.md). No deployment occurred. The commands/cost assumptions below retain the original plan; do not overwrite or rerun the first holdout report. Existing public evidence describes historical v2/v2.2 results, not the new runtime. Approve live evaluation separately from deployment; stop on schema incompatibility before running the rest of the suite.
 
 ## Scope and commands
 
