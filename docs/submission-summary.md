@@ -20,4 +20,4 @@
 
 **Source:** https://github.com/gowtham66867/swasthya-saathi (private; source package available).
 
-**Version disclosure:** Source and public demo are v3.1, deployed with owner approval on 18 November 2026. Registered team details are supplied separately.
+**Version disclosure:** Source and public demo are v3.1, deployed with owner approval on 18 November 2026. **Team:** Swasthya Saathi. **Members:** Gowtham Ramachandra and Dr Sowmya (as provided by the owner).
