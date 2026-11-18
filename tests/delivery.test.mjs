@@ -47,4 +47,11 @@ test("README headlines agree with historical data and demo contains confirmation
   const demo = await readFile(new URL("../demo.html", import.meta.url), "utf8");
   assert.match(demo, /back-translation/);
   assert.match(demo, /confirmation/);
+  const evidence = JSON.parse(
+    await readFile(new URL("../evaluation.json", import.meta.url)),
+  );
+  assert.equal(evidence.clockTimeDevelopment.verification.valid, 6);
+  assert.equal(evidence.clockTimeDevelopment.repeats.valid, 3);
+  assert.equal(evidence.v3PartialHoldout.attempted, 4);
+  assert.equal(evidence.implementation.fullCurrentHoldoutEvaluated, false);
 });

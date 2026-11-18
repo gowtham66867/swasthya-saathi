@@ -1,8 +1,9 @@
 {
-  "generatedAt": "2026-11-17T17:58:23.381Z",
+  "generatedAt": "2026-11-18T06:59:25.369Z",
   "implementation": {
-    "version": "intake-v3",
-    "liveEvaluated": false,
+    "version": "intake-v3.1",
+    "liveDevelopmentEvaluated": true,
+    "fullCurrentHoldoutEvaluated": false,
     "measurementVersions": [
       "intake-v2.1",
       "intake-v2.2"
@@ -177,6 +178,46 @@
       "Matching source evidence does not prove clinical correctness.",
       "Failed cases count as missed expected facts; reported coverage includes failures.",
       "Latency includes validation and retries, from local evaluator, not patient network."
+    ]
+  },
+  "v3PartialHoldout": {
+    "version": "intake-v3",
+    "status": "aborted",
+    "date": "2026-11-18T06:35:35.455Z",
+    "attempted": 4,
+    "valid": 3,
+    "planned": 16
+  },
+  "clockTimeDevelopment": {
+    "version": "intake-v3.1",
+    "date": "2026-11-18T06:49:33.095Z",
+    "baseline": {
+      "cases": 3,
+      "valid": 0
+    },
+    "verification": {
+      "cases": 6,
+      "valid": 6,
+      "quoteCoverage": 6,
+      "fieldCoverage": 6
+    },
+    "repeats": {
+      "cases": 3,
+      "valid": 3
+    },
+    "combinedUsage": {
+      "input": 19674,
+      "output": 4452,
+      "cached": 17184,
+      "estimatedINRNoCacheDiscount": 0.30804,
+      "estimatedINRWithCache": 0.140496
+    },
+    "combinedReservedINR": 9.6,
+    "limitations": [
+      "Development cases, including repeats, not a fresh holdout.",
+      "Classification and question usefulness still require clinician review.",
+      "Historic frozen v3 holdout was not rerun.",
+      "Usage-based cost estimate, not an account-balance measurement."
     ]
   },
   "manualTimeSavings": null,

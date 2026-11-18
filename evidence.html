@@ -13,9 +13,10 @@
         <div class="eyebrow">LIVE RESULTS, WITH LIMITS</div>
         <h1>Proof you can inspect.</h1>
         <div class="review-note">
-          Historical intake-v2/v2.2 measurements. This source is intake-v3; paid
-          v3 evaluation and deployment await approval. No new accuracy claim is
-          made.
+          Historical intake-v2/v2.2 measurements remain frozen below. Current
+          source: intake-v3.1. New development verification is reported
+          separately; a complete current-version holdout and clinical validation
+          are still pending.
         </div>
         <p class="intro">
           A functional primary-care intake prototype with a published evaluation
@@ -185,6 +186,22 @@
           intake-v2.2 on the same 30 previously seen cases. Recall 94.1%,
           precision 88.0%. This is not fresh generalization evidence.
         </p>
+        <h2>First v3 holdout stopped early</h2>
+        <p class="report-note">
+          3 valid cases out of 4 attempted, with 12 not run. It stopped at the
+          first validation failure; this is not a full holdout accuracy score.
+          The report was preserved.
+        </p>
+        <h2>Clock-time fix: development verification</h2>
+        <p class="report-note">
+          intake-v3.1: baseline 0/3 validated; fixed build 6/6 new development
+          cases and 3/3 repeat runs validated. Every required quotation and
+          target field was retained. The model selected source IDs and the
+          application supplied original quotations; proposed values and
+          categories still require human review. Combined baseline/fixed cost
+          estimate ₹0.308 before GST, ignoring cache discounts. These are
+          development/repeat results, not a fresh holdout.
+        </p>
         <h2>Human validation still required</h2>
         <p class="report-note">
           No clinician has adjudicated these labels or accepted a real patient
@@ -200,7 +217,7 @@
           >
         </p>
         <footer>
-          Measured on synthetic data · 2026-11-17T17:58:23.381Z · No clinical
+          Measured on synthetic data · 2026-11-18T06:59:25.369Z · No clinical
           validation claim.
         </footer>
       </div>
