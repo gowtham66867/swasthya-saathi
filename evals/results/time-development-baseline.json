@@ -1,0 +1,212 @@
+{
+  "kind": "Separate development diagnosis; not a holdout",
+  "date": "2026-11-18T06:45:53.966Z",
+  "budget": {
+    "approvedINR": 15,
+    "reservedINR": 3.6,
+    "perRequestReserveINR": 0.6,
+    "calls": 6,
+    "maxCalls": 25,
+    "pricingSource": "https://docs.sarvam.ai/api/getting-started/pricing",
+    "pricingChecked": "2026-11-18",
+    "inputAllowanceTokens": 40000,
+    "outputLimitTokens": 2200,
+    "note": "Conservative per-request reservations include failed requests; actual charges are estimated separately from returned usage, not measured from account balance."
+  },
+  "results": [
+    {
+      "id": "title-morning",
+      "english": "Ms. Iyer said the ache began at 6 a.m.",
+      "error": "validation",
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 182,
+            "prompt_tokens": 1433,
+            "total_tokens": 1615,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1344
+            }
+          },
+          "content": "{\n  \"questions\": [\n    {\n      \"field\": \"questions\",\n      \"quote\": \"Ms. Iyer said the ache began at 6 a.m.\",\n      \"sourceId\": \"english\",\n      \"text\": \"What specific symptoms or conditions is Ms. Iyer experiencing that led to the visit?\"\n    }\n  ],\n  \"facts\": [\n    {\n      \"field\": \"symptoms\",\n      \"quote\": \"Ms. Iyer said the ache began at 6 a.m.\",\n      \"sourceId\": \"english\"\n    },\n    {\n      \"field\": \"duration\",\n      \"quote\": \"Ms. Iyer said the ache began at 6 a.0.\",\n      \"sourceId\": \"english\"\n    }\n  ],\n  \"ambiguities\": []\n}",
+          "errors": [
+            "Evidence does not match source",
+            "Quote must preserve the full sentence or clarification answer"
+          ],
+          "valueFlags": [],
+          "questionFlags": []
+        },
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 136,
+            "prompt_tokens": 1480,
+            "total_tokens": 1616,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1408
+            }
+          },
+          "content": "{\"questions\":[{\"field\":\"duration\",\"quote\":\"Ms. Iyer said the ache began at 6 a.m.\",\"sourceId\":\"english\",\"text\":\"When did the ache begin and is it still present?\"}],\"facts\":[{\"field\":\"concern\",\"quote\":\"Ms. Iyer said the ache began at 6 a.00a.m.\",\"sourceId\":\"english\"},{\"field\":\"symptoms\",\"quote\":\"Ms. Iyer said the ache began at 6 a.m.\",\"sourceId\":\"english\"},{\"field\":\"duration\",\"quote\":\"Ms. Iyer said the ache began at 6 a.m.\",\"sourceId\":\"english\"}],\"ambiguities\":[]}",
+          "errors": [
+            "Evidence does not match source",
+            "Quote must preserve the full sentence or clarification answer"
+          ],
+          "valueFlags": [],
+          "questionFlags": []
+        }
+      ]
+    },
+    {
+      "id": "evening-onset",
+      "english": "My nausea started at 8 p.m. yesterday.",
+      "error": "validation",
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "length",
+          "usage": {
+            "completion_tokens": 2200,
+            "prompt_tokens": 1431,
+            "total_tokens": 3631,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1376
+            }
+          },
+          "content": "{\"questions\": [{\"field\": \"symptoms\", \"quote\": \"My nausea started at 8 p.m. yesterday.\", \"sourceId\": \"english\", \"text\": \"How long has the nausea persisted since it started at 8 p.m. yesterday?\"}]\n\n\t\n  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  \n\t\t  ",
+          "parseError": true,
+          "errors": [
+            "Invalid extraction schema"
+          ],
+          "valueFlags": [],
+          "questionFlags": []
+        },
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 642,
+            "prompt_tokens": 1466,
+            "total_tokens": 2108,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1408
+            }
+          },
+          "content": "{\"questions\":[{\"field\":\"duration\",\"quote\":\"My nausea started at 8 p.m. yesterday.\",\"sourceId\":\"english\",\"text\":\"When did the nausea start relative to today, and has it persisted since then?\"},{\"field\":\"concern\",\"quote\":\"My nausea started at 8 p.m. yesterday.\",\"sourceId\":\"english\",\"text\":\"Can you describe the nature and severity of the nausea?\"}],\"facts\":[{\"field\":\"symptoms\",\"quote\":\"My nausea started at 8 p.m. yesterday.\",\"sourceId\":\"english\"},{\"field\":\"concern\",\"quote\":\"My nausea started at 8 p.m. yesterday.\",\"sourceId\":\"english\"},{\"field\":\"duration\",\"quote\":\"My nausea started at 8 p.1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123498765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543210987654321098765432109876543\",\"sourceId\":\"english\"}]\n\n,\n\"ambiguities\":[]}",
+          "errors": [
+            "Evidence does not match source",
+            "Quote must preserve the full sentence or clarification answer"
+          ],
+          "valueFlags": [],
+          "questionFlags": []
+        }
+      ]
+    },
+    {
+      "id": "doctor-dose-time",
+      "english": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+      "error": "validation",
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 152,
+            "prompt_tokens": 1437,
+            "total_tokens": 1589,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1376
+            }
+          },
+          "content": "{\"questions\": [\n  {\n    \"field\": \"medicines\",\n    \"quote\": \"Dr. Mehta said I take 1.5 mg at 9 a.m.\",\n    \"sourceId\": \"english\",\n    \"text\": \"Which medicine is prescribed at 1.5 mg at 9 a.m.?\"\n  }\n]\n,\n  \"facts\": [\n    {\n      \"field\": \"medicines\",\n    \"quote\": \"Dr. Mehta said I take 1.0 mg at 9 a.m.\",\n    \"sourceId\": \"english\"\n  }\n]\n\n,\n  \"ambiguities\": []}",
+          "errors": [
+            "Evidence does not match source",
+            "Quote must preserve the full sentence or clarification answer"
+          ],
+          "valueFlags": [],
+          "questionFlags": [
+            {
+              "kind": "question-fallback",
+              "text": "Model questions rejected; fixed clarification templates used."
+            }
+          ]
+        },
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 115,
+            "prompt_tokens": 1484,
+            "total_tokens": 1599,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1408
+            }
+          },
+          "content": "{\"questions\":[{\"field\":\"medicines\",\"quote\":\"Dr. Mehta said I take 1.5 mg at 9 a.m.\",\"sourceId\":\"english\",\"text\":\"Is this medication prescribed by Dr. Mehta for you?\"}],\"facts\":[{\"field\":\"medicines\",\"quote\":\"Dr. Mehta said I take 1.5 mg at 9 a.0.\",\"sourceId\":\"english\",\"value\":{\"name\":\"?\",\"dose\":\"1.5\",\"unit\":\"mg\",\"frequency\":\"at 9 a.m.\"}}],\"ambiguities\":[]}",
+          "errors": [
+            "Evidence does not match source",
+            "Quote must preserve the full sentence or clarification answer"
+          ],
+          "valueFlags": [
+            {
+              "kind": "unsupported-value",
+              "sourceId": "english",
+              "quote": "Dr. Mehta said I take 1.5 mg at 9 a.0.",
+              "text": "Proposed value removed: Value token is not verbatim: name; Value token is not verbatim: frequency"
+            }
+          ],
+          "questionFlags": [
+            {
+              "kind": "question-fallback",
+              "text": "Model questions rejected; fixed clarification templates used."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

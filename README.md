@@ -22,7 +22,7 @@ The [two-minute walkthrough](demo.html) follows the same path. Live processing u
 | Exact fact recall on the frozen 20-case holdout | **93.0%** |
 | Exact fact precision on that holdout            | **86.8%** |
 
-These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3**; its approved first paid holdout stopped after 4/16 cases (3 valid, 1 validation failure). See [the partial-run results](docs/v3-holdout-results.md); deployment remains pending. The public Cloud Run deployment remains v2.2 until then.
+These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3.1**; its approved first paid holdout stopped after 4/16 cases (3 valid, 1 validation failure). See [the partial-run results](docs/v3-holdout-results.md); deployment remains pending. The public Cloud Run deployment remains v2.2 until deployment approval. A separately tested sentence-ID fix now passes six development cases and three repeat checks; [results and limitations](docs/time-fix-results.md).
 
 ## Architecture
 
@@ -42,7 +42,7 @@ Application code owns the plan; model output never executes tools. The extractio
 
 Shared sentence segmentation protects decimals, abbreviations, danda and newlines. Facts retain whole-source quotations. Optional proposed values require exact quote tokens and remain beside their evidence; unsupported values are removed with a flag. Deterministic multilingual rules flag selected instructions, uncertainty, corrections and family context. Original words, clarification translations, human corrections and translation confirmation remain visible and export separately.
 
-Modules: browser orchestration in `app.js`; media/workflow/review/export/i18n in `modules/`; schema and provenance in `agent.js`; bounded provider orchestration in `harness.mjs`; protected routes in `server.mjs`; request budgets in `demo-access.mjs`. See [architecture](docs/architecture.md), [v3 prompt](prompts/intake-v3.mjs) and [v3 schema](prompts/intake-v3.schema.json).
+Modules: browser orchestration in `app.js`; media/workflow/review/export/i18n in `modules/`; schema and provenance in `agent.js` and `evidence-catalog.js`; bounded provider orchestration in `harness.mjs`; protected routes in `server.mjs`; request budgets in `demo-access.mjs`. See [architecture](docs/architecture.md), [v3.1 prompt](prompts/intake-v3.1.mjs) and [v3 schema](prompts/intake-v3.schema.json).
 
 ## Run and verify
 

@@ -44,7 +44,25 @@ const output = (result = valid) =>
       {
         message: {
           content: JSON.stringify(
-            result ? { questions: [], ...result } : result,
+            result
+              ? {
+                  questions: [],
+                  ...result,
+                  facts: result.facts?.map((f) => ({
+                    field: f.field,
+                    evidenceId:
+                      f.quote === "I have a cough."
+                        ? "E0"
+                        : f.quote === "I do not have a fever."
+                          ? "E1"
+                          : "unknown",
+                    ...(f.value !== undefined ? { value: f.value } : {}),
+                  })),
+                  ambiguities: result.ambiguities?.map(() => ({
+                    evidenceId: "unknown",
+                  })),
+                }
+              : result,
           ),
         },
       },
@@ -114,7 +132,10 @@ test("patient prompt injection stays data and has no tools", async () => {
         const body = JSON.parse(options.body);
         assert.equal(body.messages[0].role, "system");
         assert.equal(body.tools, undefined);
-        assert.equal(JSON.parse(body.messages[1].content).english, text);
+        assert.equal(
+          JSON.parse(body.messages[1].content).sentences[0].quote,
+          text,
+        );
         return output({ facts: [], ambiguities: [] });
       },
     },

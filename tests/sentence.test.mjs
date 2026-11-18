@@ -47,3 +47,13 @@ test("danda, newlines and repeated identical sentences", () => {
     false,
   );
 });
+
+test("time abbreviation before explicit correction ends a complete sentence", () => {
+  assert.deepEqual(
+    segmentSentences("The pain began at 4 a.m. Actually, it began at 4 p.m."),
+    ["The pain began at 4 a.m.", "Actually, it began at 4 p.m."],
+  );
+  assert.deepEqual(segmentSentences("At 6 a.m. I take my medicine."), [
+    "At 6 a.m. I take my medicine.",
+  ]);
+});

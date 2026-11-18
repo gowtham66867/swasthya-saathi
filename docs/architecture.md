@@ -83,3 +83,7 @@ gcloud run services update-traffic swasthya-saathi --to-revisions=PREVIOUS_REVIS
 ```
 
 Docker copies built assets and the Node adapter only. Ignore files exclude credentials and Git metadata. Attach secrets via explicit Secret Manager versions; never put values in commands or source. Judge access remains off until separately provisioned/approved. The currently deployed revision remains v2.2 while v3 is reviewed locally.
+
+## v3.1 provider evidence protocol
+
+The strict provider schema selects catalog IDs, not generated quote/source strings. Application code materializes the exact original sentence before the unchanged public fact/value/question validators. This avoids provider copying corruption around clock abbreviations and decimal doses without accepting altered text. Missing/unknown IDs remain invalid; unsafe questions use template fallback. The existing call/repair ceilings and token limit are unchanged. Finish reason, parse/reference status and content-free validation categories are retained in metadata. Synthetic development traces and limits are in [the fix report](time-fix-results.md); the historical holdout remains unchanged.

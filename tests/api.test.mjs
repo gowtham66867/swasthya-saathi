@@ -23,7 +23,7 @@ test("status never exposes the secret", async () => {
     ready: true,
     provider: "Sarvam",
     mode: "synthetic-demo",
-    version: "intake-v3",
+    version: "intake-v3.1",
   });
 });
 test("live calls require configured key and explicit consent", async () => {
@@ -143,6 +143,56 @@ test("TTS uses Bulbul and does not expose provider errors", async () => {
       JSON.stringify(await result.json()).includes("secret upstream"),
       false,
     );
+  } finally {
+    globalThis.fetch = old;
+  }
+});
+
+test("confirmed API extraction resolves wire IDs to original quotes for the browser", async () => {
+  const original = "Dr. Asha said the discomfort began at 2 a.m.";
+  const old = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, "https://api.sarvam.ai/v1/chat/completions");
+    const body = JSON.parse(options.body),
+      catalog = JSON.parse(body.messages[1].content).sentences;
+    assert.equal(catalog[0].quote, original);
+    assert.equal(
+      body.response_format.json_schema.schema.properties.facts.items.properties
+        .quote,
+      undefined,
+    );
+    return Response.json({
+      choices: [
+        {
+          finish_reason: "stop",
+          message: {
+            content: JSON.stringify({
+              facts: [{ field: "duration", evidenceId: catalog[0].id }],
+              ambiguities: [],
+              questions: [],
+            }),
+          },
+        },
+      ],
+      usage: { prompt_tokens: 50, completion_tokens: 20 },
+    });
+  };
+  try {
+    const response = await handleApi(
+      req("extract", {
+        original,
+        text: original,
+        stage: "translation_confirmed",
+        translationConfirmed: true,
+      }),
+      { SARVAM_API_KEY: "test", LIVE_ACCESS_TOKEN: "a".repeat(32) },
+    );
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.deepEqual(body.result.facts, [
+      { field: "duration", quote: original, sourceId: "english" },
+    ]);
+    assert.equal(body.meta.evidenceProtocol, "catalog-ids-v1");
   } finally {
     globalThis.fetch = old;
   }

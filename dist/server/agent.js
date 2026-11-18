@@ -6,7 +6,7 @@ import {
 import { confirmationMatches } from "./translation-checks.js";
 import { VALUE_SCHEMA, valueIssues, factKey } from "./values.js";
 import { evidenceUnits, wholeEvidence } from "./sentence.js";
-export const VERSION = "intake-v3";
+export const VERSION = "intake-v3.1";
 export const FIELDS = [
   "concern",
   "symptoms",

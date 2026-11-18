@@ -1,0 +1,41 @@
+[
+  {
+    "id": "title-morning",
+    "english": "Ms. Iyer said the ache began at 6 a.m.",
+    "requiredQuotes": ["Ms. Iyer said the ache began at 6 a.m."],
+    "requiredFields": ["duration"]
+  },
+  {
+    "id": "evening-onset",
+    "english": "My nausea started at 8 p.m. yesterday.",
+    "requiredQuotes": ["My nausea started at 8 p.m. yesterday."],
+    "requiredFields": ["duration"]
+  },
+  {
+    "id": "doctor-dose-time",
+    "english": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+    "requiredQuotes": ["Dr. Mehta said I take 1.5 mg at 9 a.m."],
+    "requiredFields": ["medicines"]
+  },
+  {
+    "id": "multiple-dose-times",
+    "english": "I take 0.75 mg at 6 p.m. and 1.25 mg at 8 a.m.",
+    "requiredQuotes": ["I take 0.75 mg at 6 p.m. and 1.25 mg at 8 a.m."],
+    "requiredFields": ["medicines"]
+  },
+  {
+    "id": "time-correction",
+    "english": "The pain began at 4 a.m. Actually, it began at 4 p.m.",
+    "requiredQuotes": [
+      "The pain began at 4 a.m.",
+      "Actually, it began at 4 p.m."
+    ],
+    "requiredFields": ["duration"]
+  },
+  {
+    "id": "morning-denial",
+    "english": "I wake at 5 a.m. without a fever.",
+    "requiredQuotes": ["I wake at 5 a.m. without a fever."],
+    "requiredFields": ["symptoms"]
+  }
+]

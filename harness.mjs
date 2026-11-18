@@ -1,12 +1,16 @@
+import {
+  evidenceCatalog,
+  referenceSchema,
+  resolveReferences,
+} from "./evidence-catalog.js";
 import { sanitizeQuestions } from "./questions.js";
 import {
-  FACT_SCHEMA,
   VERSION,
   anchorEvidence,
   validateExtraction,
   clarify,
 } from "./agent.js";
-import { PROMPT } from "./prompts/intake-v3.mjs";
+import { PROMPT } from "./prompts/intake-v3.1.mjs";
 import { sanitizeValues } from "./values.js";
 export class AgentError extends Error {
   constructor(code, message) {
@@ -31,6 +35,9 @@ export async function runExtraction(
       "input",
       "Provide English text and at most 2000 characters of clarification.",
     );
+  const catalog = evidenceCatalog(sources);
+  const wireSchema = referenceSchema(catalog);
+  const diagnostics = [];
   const started = Date.now();
   let calls = 0;
   let repair = false;
@@ -46,6 +53,7 @@ export async function runExtraction(
       repair,
       latencyMs: Date.now() - started,
       usage,
+      diagnostics,
     };
     return error;
   };
@@ -68,14 +76,14 @@ export async function runExtraction(
               content:
                 PROMPT +
                 "\nRequired JSON schema: " +
-                JSON.stringify(FACT_SCHEMA) +
+                JSON.stringify(wireSchema) +
                 (issue
                   ? "\nPrior result rejected: " +
                     issue +
-                    ". Quote exactly ONE full sentence from the supplied source. Do not shorten, combine, translate or paraphrase it. Return a corrected extraction."
+                    ". Return corrected JSON using only catalog evidenceId values. Never output quote/sourceId text. Keep the answer concise."
                   : ""),
             },
-            { role: "user", content: JSON.stringify(sources) },
+            { role: "user", content: JSON.stringify({ sentences: catalog }) },
           ],
           max_tokens: 2200,
           reasoning_effort: "low",
@@ -83,9 +91,9 @@ export async function runExtraction(
           response_format: {
             type: "json_schema",
             json_schema: {
-              name: "patient_intake_v3",
+              name: "patient_intake_references_v3_1",
               strict: true,
-              schema: FACT_SCHEMA,
+              schema: wireSchema,
             },
           },
         }),
@@ -119,17 +127,45 @@ export async function runExtraction(
     usage.input += Number(body.usage?.prompt_tokens) || 0;
     usage.output += Number(body.usage?.completion_tokens) || 0;
     let result;
+    let jsonParsed = false;
     try {
       result = JSON.parse(body.choices?.[0]?.message?.content);
+      jsonParsed = true;
     } catch {
       result = null;
     }
-    const anchored = anchorEvidence(result, sources);
+    const resolved = resolveReferences(result, catalog);
+    const anchored = anchorEvidence(resolved.result, sources);
     const sanitized = sanitizeValues(anchored.result);
     const questioned = sanitizeQuestions(sanitized.result, sources);
     result = questioned.result;
-    const errors = validateExtraction(result, sources, {
-      requireQuestions: true,
+    const errors = [
+      ...resolved.errors,
+      ...validateExtraction(result, sources, { requireQuestions: true }),
+    ];
+    diagnostics.push({
+      attempt: calls,
+      finishReason: body.choices?.[0]?.finish_reason || "unknown",
+      jsonParsed,
+      referencesResolved:
+        resolved.errors.length === 0 && Boolean(resolved.result),
+      validationErrors: [
+        ...new Set(
+          errors.map((error) =>
+            error.includes("Unknown")
+              ? "unknown_evidence_id"
+              : /Evidence|Quote/.test(error)
+                ? "evidence_boundary"
+                : error.includes("Duplicate")
+                  ? "duplicate_fact"
+                  : error.includes("Field")
+                    ? "invalid_field"
+                    : "schema_validation",
+          ),
+        ),
+      ],
+      valueRemovals: sanitized.flags.length,
+      questionFallbacks: questioned.flags.length,
     });
     if (!errors.length)
       return {
@@ -138,6 +174,8 @@ export async function runExtraction(
         questionFlags: questioned.flags,
         ...clarify(result, sources),
         meta: {
+          diagnostics,
+          evidenceProtocol: "catalog-ids-v1",
           evidenceExpansions: anchored.expansions,
           version: VERSION,
           mode: "live Sarvam",

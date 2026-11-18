@@ -1,0 +1,1035 @@
+{
+  "status": "complete",
+  "date": "2026-11-18T06:49:33.095Z",
+  "version": "intake-v3.1",
+  "kind": "Development verification and repeated cases; NOT a holdout",
+  "baseline": {
+    "cases": 3,
+    "valid": 0
+  },
+  "verification": {
+    "cases": 6,
+    "valid": 6,
+    "quoteCoverage": 6,
+    "fieldCoverage": 6
+  },
+  "repeats": {
+    "cases": 3,
+    "valid": 3
+  },
+  "priorReservedINR": 3.6,
+  "budget": {
+    "approvedINR": 11.4,
+    "reservedINR": 6,
+    "perRequestReserveINR": 0.6,
+    "calls": 10,
+    "maxCalls": 19,
+    "pricingSource": "https://docs.sarvam.ai/api/getting-started/pricing",
+    "pricingChecked": "2026-11-18",
+    "inputAllowanceTokens": 40000,
+    "outputLimitTokens": 2200,
+    "note": "Conservative per-request reservations include failed requests; actual charges are estimated separately from returned usage, not measured from account balance."
+  },
+  "combinedReservedINR": 9.6,
+  "combinedUsage": {
+    "input": 19674,
+    "output": 4452,
+    "cached": 17184,
+    "estimatedINRNoCacheDiscount": 0.30804,
+    "estimatedINRWithCache": 0.140496
+  },
+  "limitations": [
+    "Development cases, including repeats, not a fresh holdout.",
+    "Classification and question usefulness still require clinician review.",
+    "Historic frozen v3 holdout was not rerun.",
+    "Usage-based cost estimate, not an account-balance measurement."
+  ],
+  "results": [
+    {
+      "id": "title-morning",
+      "round": "verification",
+      "english": "Ms. Iyer said the ache began at 6 a.m.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "Ms. Iyer said the ache began at 6 a.m.",
+              "sourceId": "english",
+              "field": "symptoms"
+            },
+            {
+              "quote": "Ms. Iyer said the ache began at 6 a.m.",
+              "sourceId": "english",
+              "field": "duration"
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [],
+        "questionFlags": [],
+        "missing": [
+          "concern",
+          "severity",
+          "medicines",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "medicines",
+            "text": "What medicines are you currently taking, if any?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 0,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 702,
+          "usage": {
+            "input": 1085,
+            "output": 34
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 34,
+            "prompt_tokens": 1085,
+            "total_tokens": 1119,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 0
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"symptoms\",\"evidenceId\":\"E0\"},{\"field\":\"duration\",\"evidenceId\":\"E0\"}],\"ambiguities\":[],\"questions\":[]}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "evening-onset",
+      "round": "verification",
+      "english": "My nausea started at 8 p.m. yesterday.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "My nausea started at 8 p.m. yesterday.",
+              "sourceId": "english",
+              "field": "concern"
+            },
+            {
+              "quote": "My nausea started at 8 p.m. yesterday.",
+              "sourceId": "english",
+              "field": "symptoms"
+            },
+            {
+              "quote": "My nausea started at 8 p.m. yesterday.",
+              "sourceId": "english",
+              "field": "duration",
+              "value": {
+                "amount": "8 p.m.",
+                "onset": "yesterday"
+              }
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [],
+        "questionFlags": [
+          {
+            "kind": "question-fallback",
+            "text": "Model questions rejected; fixed clarification templates used."
+          }
+        ],
+        "missing": [
+          "severity",
+          "medicines",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "medicines",
+            "text": "What medicines are you currently taking, if any?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 0,
+              "questionFallbacks": 1
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 524,
+          "usage": {
+            "input": 1083,
+            "output": 105
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 105,
+            "prompt_tokens": 1083,
+            "total_tokens": 1188,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1024
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"concern\",\"evidenceId\":\"E0\"},{\"field\":\"symptoms\",\"evidenceId\":\"E0\"},{\"field\":\"duration\",\"evidenceId\":\"E0\",\"value\":{\"amount\":\"8 p.m.\",\"onset\":\"yesterday\"}}]\n\n,\"ambiguities\":[],\"questions\":[{\"field\":\"symptoms\",\"evidenceId\":\"E0\",\"text\":\"Are there any other symptoms accompanying the nausea?\"},{\"field\":\"duration\",\"evidenceId\":\"E0\",\"text\":\"Is the nausea continuing or has it resolved?\"}]}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "doctor-dose-time",
+      "round": "verification",
+      "english": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+              "sourceId": "english",
+              "field": "medicines"
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+            "text": "Proposed value removed: Value token is not verbatim: name"
+          }
+        ],
+        "questionFlags": [],
+        "missing": [
+          "concern",
+          "symptoms",
+          "duration",
+          "severity",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "duration",
+            "text": "When did this concern start?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 1,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 352,
+          "usage": {
+            "input": 1089,
+            "output": 51
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 51,
+            "prompt_tokens": 1089,
+            "total_tokens": 1140,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1024
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"medicines\",\"evidenceId\":\"E0\",\"value\":{\"name\":\"unnamed\",\"dose\":\"1.5\",\"unit\":\"mg\",\"frequency\":\"at 9 a.m.\"}}],\"ambiguities\":[],\"questions\":[]}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "multiple-dose-times",
+      "round": "verification",
+      "english": "I take 0.75 mg at 6 p.m. and 1.25 mg at 8 a.m.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "I take 0.75 mg at 6 p.m. and 1.25 mg at 8 a.m.",
+              "sourceId": "english",
+              "field": "medicines"
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "I take 0.75 mg at 6 p.m. and 1.25 mg at 8 a.m.",
+            "text": "Proposed value removed: Value token is not verbatim: name"
+          }
+        ],
+        "questionFlags": [],
+        "missing": [
+          "concern",
+          "symptoms",
+          "duration",
+          "severity",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "duration",
+            "text": "When did this concern start?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [
+                "duplicate_fact"
+              ],
+              "valueRemovals": 2,
+              "questionFallbacks": 0
+            },
+            {
+              "attempt": 2,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 1,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 2,
+          "repair": true,
+          "latencyMs": 939,
+          "usage": {
+            "input": 2231,
+            "output": 175
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 121,
+            "prompt_tokens": 1100,
+            "total_tokens": 1221,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1024
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"medicines\",\"evidenceId\":\"E0\",\"value\":{\"name\":\"unnamed\",\"dose\":\"0.75\",\"unit\":\"mg\",\"frequency\":\"at 6 p.m.\",\"negated\":false}},{\"field\":\"medicines\",\"evidenceId\":\"E0\",\"value\":{\"name\":\"unnamed\",\"dose\":\"1.25\",\"unit\":\"mg\",\"frequency\":\"at 8 a.m.\"}}],\"ambiguities\":[],\"questions\":[{\"field\":\"medicines\",\"evidenceId\":\"E0\",\"text\":\"What is the name of the medicine you are taking?\"}]}",
+          "errors": [
+            "Duplicate fact"
+          ]
+        },
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 54,
+            "prompt_tokens": 1131,
+            "total_tokens": 1185,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 992
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"medicines\",\"evidenceId\":\"E0\",\"value\":{\"name\":\"unnamed\",\"dose\":\"0.75 mg at 6 p.m.\",\"frequency\":\"6 p.m.\"}}],\"ambiguities\":[],\"questions\":[]}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "time-correction",
+      "round": "verification",
+      "english": "The pain began at 4 a.m. Actually, it began at 4 p.m.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "The pain began at 4 a.m.",
+              "sourceId": "english",
+              "field": "symptoms"
+            },
+            {
+              "quote": "The pain began at 4 a.m.",
+              "sourceId": "english",
+              "field": "duration",
+              "value": {
+                "onset": "4 a.m."
+              }
+            },
+            {
+              "quote": "Actually, it began at 4 p.m.",
+              "sourceId": "english",
+              "field": "symptoms"
+            },
+            {
+              "quote": "Actually, it began at 4 p.m.",
+              "sourceId": "english",
+              "field": "duration",
+              "value": {
+                "onset": "4 p.m."
+              }
+            }
+          ],
+          "ambiguities": [
+            {
+              "quote": "The pain began at 4 a.m.",
+              "sourceId": "english"
+            },
+            {
+              "quote": "Actually, it began at 4 p.m.",
+              "sourceId": "english"
+            }
+          ],
+          "questions": []
+        },
+        "valueFlags": [
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "The pain began at 4 a.m.",
+            "text": "Proposed value removed: Invalid value object"
+          },
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "Actually, it began at 4 p.m.",
+            "text": "Proposed value removed: Invalid value object"
+          }
+        ],
+        "questionFlags": [],
+        "missing": [
+          "concern",
+          "severity",
+          "medicines",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "ambiguities",
+            "text": "Please clarify the statements marked as ambiguous below. If unsure, leave them unresolved."
+          },
+          {
+            "field": "medicines",
+            "text": "What medicines are you currently taking, if any?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 2,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 474,
+          "usage": {
+            "input": 1114,
+            "output": 212
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 212,
+            "prompt_tokens": 1114,
+            "total_tokens": 1326,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 672
+            }
+          },
+          "wireContent": "{\n  \"facts\": [\n    {\n      \"field\": \"symptoms\",\n      \"evidenceId\": \"E0\",\n      \"value\": {}\n    },\n    {\n      \"field\": \"duration\",\n      \"evidenceId\": \"E0\",\n      \"value\": {\n        \"onset\": \"4 a.m.\"\n      }\n    },\n    {\n      \"field\": \"symptoms\",\n      \"evidenceId\": \"E1\",\n      \"value\": {}\n    },\n    {\n      \"field\": \"duration\",\n      \"evidenceId\": \"E1\",\n      \"value\": {\n        \"onset\": \"4 p.m.\"\n      }\n    }\n  ],\n  \"ambiguities\": [\n    {\n      \"evidenceId\": \"E0\"\n    },\n    {\n      \"evidenceId\": \"E1\"\n    }\n  ],\n  \"questions\": []\n}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "morning-denial",
+      "round": "verification",
+      "english": "I wake at 5 a.m. without a fever.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "I wake at 5 a.m. without a fever.",
+              "sourceId": "english",
+              "field": "symptoms",
+              "value": {
+                "negated": true
+              }
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [],
+        "questionFlags": [],
+        "missing": [
+          "concern",
+          "duration",
+          "severity",
+          "medicines",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "duration",
+            "text": "When did this concern start?"
+          },
+          {
+            "field": "medicines",
+            "text": "What medicines are you currently taking, if any?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 0,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 241,
+          "usage": {
+            "input": 1084,
+            "output": 31
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 31,
+            "prompt_tokens": 1084,
+            "total_tokens": 1115,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1024
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"symptoms\",\"evidenceId\":\"E0\",\"value\":{\"negated\":true}}],\"ambiguities\":[],\"questions\":[]}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "title-morning",
+      "round": "repeat",
+      "english": "Ms. Iyer said the ache began at 6 a.m.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "Ms. Iyer said the ache began at 6 a.m.",
+              "sourceId": "english",
+              "field": "concern"
+            },
+            {
+              "quote": "Ms. Iyer said the ache began at 6 a.m.",
+              "sourceId": "english",
+              "field": "symptoms"
+            },
+            {
+              "quote": "Ms. Iyer said the ache began at 6 a.m.",
+              "sourceId": "english",
+              "field": "duration",
+              "value": {
+                "onset": "6 a.m."
+              }
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "Ms. Iyer said the ache began at 6 a.m.",
+            "text": "Proposed value removed: Value key not allowed for field: name; Value key not allowed for field: onset"
+          },
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "Ms. Iyer said the ache began at 6 a.m.",
+            "text": "Proposed value removed: Value key not allowed for field: name"
+          }
+        ],
+        "questionFlags": [],
+        "missing": [
+          "severity",
+          "medicines",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "medicines",
+            "text": "What medicines are you currently taking, if any?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 2,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 597,
+          "usage": {
+            "input": 1085,
+            "output": 165
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 165,
+            "prompt_tokens": 1085,
+            "total_tokens": 1250,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1024
+            }
+          },
+          "wireContent": "{\n  \"facts\": [\n    {\n      \"field\": \"concern\",\n      \"evidenceId\": \"E0\",\n      \"value\": {\n        \"name\": \"ache\",\n        \"onset\": \"6 a.m.\"\n      }\n    },\n    {\n      \"field\": \"symptoms\",\n      \"evidenceId\": \"E0\",\n      \"value\": {\n        \"name\": \"ache\"\n      }\n    },\n    {\n      \"field\": \"duration\",\n      \"evidenceId\": \"E0\",\n      \"value\": {\n      \"onset\": \"6 a.m.\"\n      }\n    }\n  ],\n  \"ambiguities\": [],\n  \"questions\": []\n}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "evening-onset",
+      "round": "repeat",
+      "english": "My nausea started at 8 p.m. yesterday.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "My nausea started at 8 p.m. yesterday.",
+              "sourceId": "english",
+              "field": "concern"
+            },
+            {
+              "quote": "My nausea started at 8 p.m. yesterday.",
+              "sourceId": "english",
+              "field": "symptoms"
+            },
+            {
+              "quote": "My nausea started at 8 p.m. yesterday.",
+              "sourceId": "english",
+              "field": "duration",
+              "value": {
+                "amount": "8 p.m.",
+                "onset": "yesterday"
+              }
+            }
+          ],
+          "ambiguities": [],
+          "questions": []
+        },
+        "valueFlags": [],
+        "questionFlags": [
+          {
+            "kind": "question-fallback",
+            "text": "Model questions rejected; fixed clarification templates used."
+          }
+        ],
+        "missing": [
+          "severity",
+          "medicines",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "field": "medicines",
+            "text": "What medicines are you currently taking, if any?"
+          },
+          {
+            "field": "allergies",
+            "text": "Do you have any known allergies?"
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 0,
+              "questionFallbacks": 1
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 400,
+          "usage": {
+            "input": 1083,
+            "output": 107
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 107,
+            "prompt_tokens": 1083,
+            "total_tokens": 1190,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1024
+            }
+          },
+          "wireContent": "{\"facts\":[{\"field\":\"concern\",\"evidenceId\":\"E0\"},{\"field\":\"symptoms\",\"evidenceId\":\"E0\"},{\"field\":\"duration\",\"evidenceId\":\"E0\",\"value\":{\"amount\":\"8 p.m.\",\"onset\":\"yesterday\"}}]\n\n,\"ambiguities\":[],\"questions\":[{\"field\":\"symptoms\",\"evidenceId\":\"E0\",\"text\":\"How long has the nausea lasted?\"},{\"field\":\"symptoms\",\"evidenceId\":\"E0\",\"text\":\"Are there any other symptoms such as vomiting or abdominal pain?\"}]}",
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "doctor-dose-time",
+      "round": "repeat",
+      "english": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+      "valid": true,
+      "quoteCoverage": true,
+      "fieldCoverage": true,
+      "output": {
+        "result": {
+          "facts": [
+            {
+              "quote": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+              "sourceId": "english",
+              "field": "medicines"
+            }
+          ],
+          "ambiguities": [],
+          "questions": [
+            {
+              "quote": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+              "sourceId": "english",
+              "field": "medicines",
+              "text": "What is the name of the medicine you take?"
+            }
+          ]
+        },
+        "valueFlags": [
+          {
+            "kind": "unsupported-value",
+            "sourceId": "english",
+            "quote": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+            "text": "Proposed value removed: Value token is not verbatim: name"
+          }
+        ],
+        "questionFlags": [],
+        "missing": [
+          "concern",
+          "symptoms",
+          "duration",
+          "severity",
+          "allergies",
+          "history",
+          "questions"
+        ],
+        "questions": [
+          {
+            "quote": "Dr. Mehta said I take 1.5 mg at 9 a.m.",
+            "sourceId": "english",
+            "field": "medicines",
+            "text": "What is the name of the medicine you take?",
+            "proposed": true
+          }
+        ],
+        "meta": {
+          "diagnostics": [
+            {
+              "attempt": 1,
+              "finishReason": "stop",
+              "jsonParsed": true,
+              "referencesResolved": true,
+              "validationErrors": [],
+              "valueRemovals": 1,
+              "questionFallbacks": 0
+            }
+          ],
+          "evidenceProtocol": "catalog-ids-v1",
+          "evidenceExpansions": 0,
+          "version": "intake-v3.1",
+          "mode": "live Sarvam",
+          "model": "sarvam-105b",
+          "calls": 1,
+          "repair": false,
+          "latencyMs": 394,
+          "usage": {
+            "input": 1089,
+            "output": 145
+          }
+        }
+      },
+      "attempts": [
+        {
+          "status": 200,
+          "finishReason": "stop",
+          "usage": {
+            "completion_tokens": 145,
+            "prompt_tokens": 1089,
+            "total_tokens": 1234,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": null,
+              "audio_tokens": null,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": null
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": null,
+              "cached_tokens": 1056
+            }
+          },
+          "wireContent": "{\n  \"facts\": [\n    {\n      \"field\": \"medicines\",\n      \"evidenceId\": \"E0\",\n      \"value\": {\n        \"name\": \"unnamed\",\n        \"dose\": \"1.5\",\n        \"unit\": \"mg\",\n        \"frequency\": \"at 9 a.m.\"\n      }\n    }\n  ],\n  \"ambiguities\": [],\n  \"questions\": [\n    {\n      \"field\": \"medicines\",\n      \"evidenceId\": \"E0\",\n      \"text\": \"What is the name of the medicine you take?\"\n    }\n  ]\n}",
+          "errors": []
+        }
+      ]
+    }
+  ]
+}

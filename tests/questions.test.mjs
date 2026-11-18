@@ -26,7 +26,7 @@ test("targeted question retains evidence and same extraction call", async () => 
               content: JSON.stringify({
                 facts: [],
                 ambiguities: [],
-                questions: [q],
+                questions: [{ field: q.field, evidenceId: "E1", text: q.text }],
               }),
             },
           },

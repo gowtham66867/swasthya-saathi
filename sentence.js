@@ -9,7 +9,18 @@ export function segmentSentences(text) {
   for (const line of text.split(/\r?\n/)) {
     const masked = line
       .replace(/(?<=\d)\.(?=\d)/g, "\uE000")
-      .replace(abbreviations, (match) => match.replaceAll(".", "\uE000"));
+      .replace(abbreviations, (match, offset) => {
+        // A time abbreviation can also end a sentence before an explicit
+        // correction. Preserve the inner dot and let Intl see its final stop.
+        const correctionFollows =
+          /^[ap]\.m\.$/i.test(match) &&
+          /^\s+(?:Actually\b|Correction\s*:)/i.test(
+            line.slice(offset + match.length),
+          );
+        return correctionFollows
+          ? match.slice(0, -1).replaceAll(".", "\uE000") + "."
+          : match.replaceAll(".", "\uE000");
+      });
     // Danda is a hard end even when Intl's English locale would not split it.
     const chunks = masked.match(/[^।]+।?|।/g) || [];
     let offset = 0;

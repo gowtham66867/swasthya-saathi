@@ -7,3 +7,6 @@ evals/report.live.json
 # Human-recorded fictional audio stays local; review consent before paid upload.
 evals/audio-private/
 evals/results/human-speech.json
+
+# PDF rendering intermediates
+/tmp/pdfs/

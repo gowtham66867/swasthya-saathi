@@ -9,7 +9,7 @@ const fact = {
   value: { name: "amlodipine", dose: "2.5", unit: "mg", frequency: "daily" },
 };
 test("v3 supports extractive proposed values", () => {
-  assert.equal(VERSION, "intake-v3");
+  assert.equal(VERSION, "intake-v3.1");
   assert.deepEqual(valueIssues(fact), []);
   assert.deepEqual(
     validateExtraction(

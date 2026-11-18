@@ -39,6 +39,7 @@ console.log("Built dist/server/index.js");
 for (const name of [
   "agent.js",
   "harness.mjs",
+  "evidence-catalog.js",
   "review-tools.js",
   "sentence.js",
   "rule-patterns.js",
