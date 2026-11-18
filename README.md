@@ -22,7 +22,7 @@ The [two-minute walkthrough](demo.html) follows the same path. Live processing u
 | Exact fact recall on the frozen 20-case holdout | **93.0%** |
 | Exact fact precision on that holdout            | **86.8%** |
 
-These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3.1**; its approved first paid holdout stopped after 4/16 cases (3 valid, 1 validation failure). See [the partial-run results](docs/v3-holdout-results.md); deployment remains pending. The public Cloud Run deployment remains v2.2 until deployment approval. A separately tested sentence-ID fix now passes six development cases and three repeat checks; [results and limitations](docs/time-fix-results.md).
+These are the preserved intake-v2 results, not v3 scores. Inspect [the evidence page](https://swasthya-saathi-935048564575.asia-south1.run.app/evidence.html), [raw results](evals/results/text-live.json) and [failure analysis](docs/implementation-phases.md). The current source is **intake-v3.1**; its approved first paid holdout stopped after 4/16 cases (3 valid, 1 validation failure). See [the partial-run results](docs/v3-holdout-results.md); the tested v3.1 fix has since been deployed with owner approval. The public Cloud Run deployment is now v3.1 (18 November 2026). A separately tested sentence-ID fix now passes six development cases and three repeat checks; [results and limitations](docs/time-fix-results.md).
 
 ## Architecture
 
@@ -67,7 +67,7 @@ The server enforces same-origin requests, explicit consent, access-token compari
 
 A separate `DEMO_ACCESS_TOKEN` can enable an expiring, shared **request-capped** demo without sharing the owner token. All settings must be present: token, `DEMO_REQUEST_LIMIT`, absolute `DEMO_EXPIRES_AT`, and `DEMO_BUDGET_BUCKET`. Counter metadata is atomically updated in private Cloud Storage so restarts/concurrent instances do not reset the cap. Consent and all other gates still apply. Missing/unavailable budget storage denies requests.
 
-No demo secret, bucket or permissions were created. [Judge-access setup](docs/judge-access.md) describes the approval-dependent configuration. The bucket holds a hashed budget identifier and count only, never patient text/audio. Caps count authenticated POST attempts, including failed requests; an extraction attempt can contain up to three model calls.
+No judge-demo secret, bucket or permissions were created. [Judge-access setup](docs/judge-access.md) describes the approval-dependent configuration. The bucket holds a hashed budget identifier and count only, never patient text/audio. Caps count authenticated POST attempts, including failed requests; an extraction attempt can contain up to three model calls.
 
 ## Live evaluation and deployment approval
 
@@ -85,3 +85,5 @@ Deployment is a separate approval step after evaluated results are reviewed. Bui
 - Historical speech results use quiet same-provider synthetic audio. Human speech, accents and clinic noise remain unmeasured. No time-saving benefit has been demonstrated.
 - Workflow state is browser-owned and not server-attested. Shared access tokens are prototype gates, not clinical identity management. Audio duration is not independently decoded server-side; size is enforced. Sarvam processes live content under its own policies; infrastructure may retain request metadata, and local exports/clipboard copies remain with the operator.
 - Judge request caps are not INR spending caps. Durable storage must be configured and verified before judge access is enabled. [Independent validation kit](docs/validation-kit.md) lists the remaining human work.
+
+Deployment verification (18 November 2026): revision `swasthya-saathi-00007-shl` serves all traffic. One synthetic live API smoke test preserved the complete clock-time quote; unauthenticated paid access returned 401. Combined development and deployed-smoke estimate: INR 0.32 before GST, within the approved INR 15 allowance. [Deployment record](docs/deployment-v3.1.md).

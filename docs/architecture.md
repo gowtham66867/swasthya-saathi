@@ -68,7 +68,7 @@ Historical v2/v2.2 results stay unchanged. `npm run eval` replays 30 historical 
 
 ## Deployment and rollback
 
-Deployment needs fresh approval. Existing project `swasthya-saathi-2026`, service `swasthya-saathi`, region `asia-south1`. CI verifies code but never deploys.
+Future deployments need fresh approval. Owner-approved v3.1 is deployed as `swasthya-saathi-00007-shl` (18 November 2026). Existing project `swasthya-saathi-2026`, service `swasthya-saathi`, region `asia-south1`. CI verifies code but never deploys.
 
 ```sh
 npm test
@@ -82,7 +82,7 @@ gcloud run revisions list --service=swasthya-saathi --project=swasthya-saathi-20
 gcloud run services update-traffic swasthya-saathi --to-revisions=PREVIOUS_REVISION=100 --project=swasthya-saathi-2026 --region=asia-south1
 ```
 
-Docker copies built assets and the Node adapter only. Ignore files exclude credentials and Git metadata. Attach secrets via explicit Secret Manager versions; never put values in commands or source. Judge access remains off until separately provisioned/approved. The currently deployed revision remains v2.2 while v3 is reviewed locally.
+Docker copies built assets and the Node adapter only. Ignore files exclude credentials and Git metadata. Attach secrets via explicit Secret Manager versions; never put values in commands or source. Judge access remains off until separately provisioned/approved. The owner-approved v3.1 revision is now deployed; [verification](deployment-v3.1.md).
 
 ## v3.1 provider evidence protocol
 

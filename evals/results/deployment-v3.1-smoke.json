@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-18T07:30:14.136Z",
+  "kind": "Deployed synthetic development smoke test, not a holdout",
+  "revision": "swasthya-saathi-00007-shl",
+  "status": {
+    "ready": true,
+    "provider": "Sarvam",
+    "mode": "synthetic-demo",
+    "version": "intake-v3.1"
+  },
+  "quote": "Dr. Asha said the discomfort began at 2 a.m.",
+  "result": {
+    "facts": [
+      {
+        "quote": "Dr. Asha said the discomfort began at 2 a.m.",
+        "sourceId": "english",
+        "field": "symptoms"
+      },
+      {
+        "quote": "Dr. Asha said the discomfort began at 2 a.m.",
+        "sourceId": "english",
+        "field": "duration"
+      }
+    ],
+    "ambiguities": [],
+    "questions": []
+  },
+  "meta": {
+    "diagnostics": [
+      {
+        "attempt": 1,
+        "finishReason": "stop",
+        "jsonParsed": true,
+        "referencesResolved": true,
+        "validationErrors": [],
+        "valueRemovals": 0,
+        "questionFallbacks": 0
+      }
+    ],
+    "evidenceProtocol": "catalog-ids-v1",
+    "evidenceExpansions": 0,
+    "version": "intake-v3.1",
+    "mode": "live Sarvam",
+    "model": "sarvam-105b",
+    "calls": 1,
+    "repair": false,
+    "latencyMs": 312,
+    "usage": {
+      "input": 1085,
+      "output": 38
+    }
+  },
+  "accessGateStatus": 401,
+  "estimatedINRBeforeGSTNoCacheDiscount": 0.0118,
+  "priorDevelopmentEstimateINR": 0.30804,
+  "combinedEstimatedINRBeforeGSTNoCacheDiscount": 0.31983999999999996,
+  "combinedConservativeReservedINR": 11.4,
+  "approvedINR": 15
+}

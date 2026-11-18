@@ -36,3 +36,9 @@ Checks: 161 unit/integration tests, 46 offline fixture validations, build and fo
 No deployment or public-visibility changes were made. Submission remains pending the organizer's link, registered team details and approval to update the public demo if desired.
 
 Artifacts: [baseline traces](../evals/results/time-development-baseline.json), [fixed traces and budget](../evals/results/time-development-fixed.json), [development cases](../evals/time-development.json).
+
+## Owner-approved deployment verification
+
+After the user approved deployment, v3.1 was deployed as `swasthya-saathi-00007-shl` on 18 November 2026, serving 100% of traffic. A separate fictional API smoke test preserved `Dr. Asha said the discomfort began at 2 a.m.` exactly and returned the catalog-ID protocol in one model call. Unauthenticated paid access returned 401. Browser verification completed the sample confirmation, review and handoff workflow.
+
+Development plus deployed smoke: estimated INR 0.31984 before GST without cache discounts; conservative reserved allowance INR 11.40 of INR 15. [Smoke record](../evals/results/deployment-v3.1-smoke.json). No submission has been made; the organizer's form link and registered team details remain pending.
