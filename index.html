@@ -83,13 +83,19 @@
               <p data-i18n="voiceHelp"></p>
               <button id="record" class="primary" data-i18n="record"></button
               ><small data-i18n="recordHint"></small>
+              <p class="muted">
+                Recording needs processing consent, an app access token and
+                microphone permission. If recording is blocked in an in-app
+                browser, copy this page’s address into Chrome or Safari and
+                allow the microphone there. You can also type below.
+              </p>
             </div>
             <label class="consent"
               ><input type="checkbox" id="consent" /><span
                 data-i18n="consent"
               ></span
             ></label>
-            <details>
+            <details id="live-access">
               <summary>
                 Live processing access / लाइव एक्सेस / நேரடி அணுகல்
               </summary>

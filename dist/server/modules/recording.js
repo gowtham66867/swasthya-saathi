@@ -1,4 +1,23 @@
 // Ephemeral media only. All API operations remain application-owned callbacks.
+export function recordingError(error) {
+  if (
+    ["NotAllowedError", "PermissionDeniedError", "SecurityError"].includes(
+      error?.name,
+    )
+  )
+    return "Microphone access was blocked. Allow the microphone in this browser’s site settings and in your device settings, then retry. If this is an in-app browser, open this page directly in Chrome or Safari.";
+  if (["NotFoundError", "DevicesNotFoundError"].includes(error?.name))
+    return "No microphone was found. Connect or enable a microphone, then retry, or type the patient’s words.";
+  if (
+    ["NotReadableError", "TrackStartError", "AbortError"].includes(error?.name)
+  )
+    return "The microphone could not start. Close other apps using it, check your device’s microphone settings, and retry.";
+  if (error?.name === "NotSupportedError")
+    return "This browser cannot record a supported audio format. Open this page directly in Chrome or Safari, or type the patient’s words.";
+  return (
+    error?.message || "Recording failed. Retry or type the patient’s words."
+  );
+}
 export function createRecording({
   $,
   t,
@@ -19,6 +38,7 @@ export function createRecording({
   clock = globalThis,
 }) {
   let recording = null,
+    requesting = false,
     stream = null,
     timer = null,
     audioUrl = null;
@@ -62,11 +82,17 @@ export function createRecording({
       recording.stop();
       return;
     }
-    if (isBusy()) return;
+    if (requesting || isBusy()) return;
     try {
       requireConsent();
       if (!mediaDevices?.getUserMedia || !Recorder)
-        throw Error("Recording unavailable. Type the patient’s words.");
+        throw Error(
+          "Recording is unavailable in this browser. Open this HTTPS page directly in Chrome or Safari and allow microphone access, or type the patient’s words.",
+        );
+      requesting = true;
+      status(
+        "Waiting for microphone permission. Choose Allow in the browser prompt.",
+      );
       const revision = getRevision();
       const acquired = await mediaDevices.getUserMedia({ audio: true });
       if (revision !== getRevision() || !$("consent").checked) {
@@ -84,7 +110,7 @@ export function createRecording({
         "audio/webm;codecs=opus",
         "audio/mp4",
         "audio/ogg;codecs=opus",
-      ].find((t) => Recorder.isTypeSupported(t));
+      ].find((t) => Recorder.isTypeSupported?.(t));
       const recorder = new Recorder(
         stream,
         type ? { mimeType: type } : undefined,
@@ -104,7 +130,8 @@ export function createRecording({
         $("voice-title").textContent = `${t("listening")} · ${++seconds}/25`;
         if (seconds >= 25 && recorder.state === "recording") recorder.stop();
       }, 1000);
-      recorder.onstop = () => {
+      let captureError = null;
+      const finishCapture = () => {
         clock.clearInterval(timer);
         acquired.getTracks().forEach((t) => t.stop());
         stream = null;
@@ -113,8 +140,24 @@ export function createRecording({
         button.textContent = t(target ? "answer" : "record");
         $("voice-title").textContent = t("voice");
         document.querySelector(".voice-box").classList.remove("recording");
+      };
+      recorder.onerror = (event) => {
+        captureError =
+          event.error ||
+          new Error("Audio capture failed. Retry or type the patient’s words.");
+        finishCapture();
+        status(recordingError(captureError));
+        if (recorder.state === "recording") recorder.stop();
+      };
+      recorder.onstop = () => {
+        finishCapture();
+        if (captureError) return;
         if (flow.state === "cancelled" || !$("consent").checked)
           return status("Recording discarded.");
+        if (!chunks.some((chunk) => chunk.size))
+          return status(
+            "No audio was captured. Check the microphone and try a longer recording, or type the patient’s words.",
+          );
         task(async (signal, check) => {
           const form = new FormData();
           const extension = recorder.mimeType.includes("mp4")
@@ -143,10 +186,17 @@ export function createRecording({
       };
       recorder.start();
     } catch (e) {
+      clock.clearInterval(timer);
       stream?.getTracks().forEach((t) => t.stop());
+      stream = null;
       recording = null;
       setBusy(false);
-      status(e.message);
+      button.textContent = t(target ? "answer" : "record");
+      $("voice-title").textContent = t("voice");
+      document.querySelector(".voice-box")?.classList.remove("recording");
+      status(recordingError(e));
+    } finally {
+      requesting = false;
     }
   }
 

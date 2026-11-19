@@ -164,8 +164,13 @@ function requireConsent() {
   if (!$("consent").checked) throw Error(t("noConsent"));
   if (!ready)
     throw Error("Live Sarvam is not configured. Try a fictional sample case.");
-  if (!$("access").value)
-    throw Error("Enter the deployment owner’s live access token.");
+  if (!$("access").value.trim()) {
+    $("live-access").open = true;
+    $("access").focus();
+    throw Error(
+      "Live recording, translation and playback need an app access token. Enter the deployment owner’s token in Live processing access, then retry. Sample cases work without a token.",
+    );
+  }
 }
 async function api(path, body, signal) {
   const isForm = body instanceof FormData;
