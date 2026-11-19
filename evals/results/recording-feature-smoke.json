@@ -1,0 +1,178 @@
+{
+  "date": "2026-11-19T06:08:44.983Z",
+  "approvedINR": 5,
+  "reservedINR": 4.6,
+  "checks": [
+    {
+      "route": "speak",
+      "language": "te-IN",
+      "ok": true,
+      "ms": 1015,
+      "audioSeconds": 2.1333333333333333,
+      "characters": 31
+    },
+    {
+      "route": "transcribe",
+      "language": "te-IN",
+      "ok": true,
+      "ms": 367,
+      "transcript": "నాకు రెండు రోజులుగా దగ్గు ఉంది."
+    },
+    {
+      "route": "translate",
+      "direction": "forward",
+      "language": "te-IN",
+      "ok": true,
+      "ms": 714,
+      "text": "I have had a cough for two days."
+    },
+    {
+      "route": "translate",
+      "direction": "back",
+      "language": "te-IN",
+      "ok": true,
+      "ms": 659,
+      "text": "నాకు రెండు రోజులుగా దగ్గు ఉంది."
+    },
+    {
+      "route": "speak",
+      "language": "kn-IN",
+      "ok": true,
+      "ms": 743,
+      "audioSeconds": 2.1333333333333333,
+      "characters": 30
+    },
+    {
+      "route": "transcribe",
+      "language": "kn-IN",
+      "ok": true,
+      "ms": 504,
+      "transcript": "ನನಗೆ ಎರಡು ದಿನಗಳಿಂದ ಕೆಮ್ಮು ಇದೆ."
+    },
+    {
+      "route": "translate",
+      "direction": "forward",
+      "language": "kn-IN",
+      "ok": true,
+      "ms": 700,
+      "text": "I have been coughing for two days."
+    },
+    {
+      "route": "translate",
+      "direction": "back",
+      "language": "kn-IN",
+      "ok": true,
+      "ms": 711,
+      "text": "ನನಗೆ ಎರಡು ದಿನಗಳಿಂದ ಕೆಮ್ಮು ಬರುತ್ತಿದೆ."
+    }
+  ],
+  "kind": "Synthetic functionality smoke; not language or clinical accuracy",
+  "status": "partial: speech/translation and medication extraction passed; denial preservation failed",
+  "error": "Missing denial evidence",
+  "estimatedINRBeforeGST": null,
+  "estimatedINRWith18PercentGST": null,
+  "note": "INR 4.60 conservatively reserved within INR 5. Speech/translation measured estimate INR 0.486 before GST; first extraction usage was not retained after assertion failure. Additional extraction reservation INR 1 covers at most three 20k-byte input/2200-output-token calls plus tax. No holdout rerun.",
+  "followup": {
+    "kind": "Separate synthetic development functionality check; original denial failure retained",
+    "source": "I feel tired. I take metformin 500 mg twice daily.",
+    "status": 200,
+    "requestPayloadBytes": 6998,
+    "data": {
+      "result": {
+        "facts": [
+          {
+            "quote": "I feel tired.",
+            "sourceId": "english",
+            "field": "concern"
+          },
+          {
+            "quote": "I feel tired.",
+            "sourceId": "english",
+            "field": "symptoms"
+          },
+          {
+            "quote": "I take metformin 500 mg twice daily.",
+            "sourceId": "english",
+            "field": "medicines",
+            "value": {
+              "name": "metformin",
+              "dose": "500",
+              "unit": "mg",
+              "frequency": "twice daily"
+            }
+          }
+        ],
+        "ambiguities": [],
+        "questions": [
+          {
+            "quote": "I feel tired.",
+            "sourceId": "english",
+            "field": "symptoms",
+            "text": "How long have you been feeling tired?"
+          },
+          {
+            "quote": "I take metformin 500 mg twice daily.",
+            "sourceId": "english",
+            "field": "medicines",
+            "text": "Are you taking any other medicines?"
+          }
+        ]
+      },
+      "valueFlags": [],
+      "questionFlags": [],
+      "missing": [
+        "duration",
+        "severity",
+        "allergies",
+        "history",
+        "questions"
+      ],
+      "questions": [
+        {
+          "quote": "I feel tired.",
+          "sourceId": "english",
+          "field": "symptoms",
+          "text": "How long have you been feeling tired?",
+          "proposed": true
+        },
+        {
+          "quote": "I take metformin 500 mg twice daily.",
+          "sourceId": "english",
+          "field": "medicines",
+          "text": "Are you taking any other medicines?",
+          "proposed": true
+        }
+      ],
+      "meta": {
+        "diagnostics": [
+          {
+            "attempt": 1,
+            "finishReason": "stop",
+            "jsonParsed": true,
+            "referencesResolved": true,
+            "validationErrors": [],
+            "valueRemovals": 0,
+            "questionFallbacks": 0
+          }
+        ],
+        "evidenceProtocol": "catalog-ids-v1",
+        "evidenceExpansions": 0,
+        "version": "intake-v3.1",
+        "mode": "live Sarvam",
+        "model": "sarvam-105b",
+        "calls": 1,
+        "repair": false,
+        "latencyMs": 954,
+        "usage": {
+          "input": 1108,
+          "output": 109
+        }
+      },
+      "signals": [],
+      "rulesVersion": "review-rules-v2"
+    }
+  },
+  "firstExtractionUsageUnretained": true,
+  "speechAndTranslationEstimateINRBeforeGST": 0.486,
+  "followupExtractionEstimateINRBeforeGST": 0.013805
+}
